@@ -1,7 +1,7 @@
 import streamlit as st
 import qrcode
 from io import BytesIO
-from PIL import Image
+from PIL import Image, ImageOps, ImageDraw, ImageFont
 import base64
 import time
 
@@ -88,13 +88,26 @@ def generate_qr(upi_url):
     qr = qrcode.QRCode(version=1, box_size=10, border=2)
     qr.add_data(upi_url)
     qr.make(fit=True)
-    # SOLUTION: Added .convert('RGB') to make it compatible with Streamlit and PIL
     img = qr.make_image(fill_color="#1e293b", back_color="white").convert('RGB')
     return img
 
 def get_image_download_link(img, filename, text):
+    # Professional Standee Look Logic
+    # Adding a white border and space for a cleaner layout
+    canvas_width = img.width + 100
+    canvas_height = img.height + 150
+    
+    # Create a white background canvas
+    canvas = Image.new('RGB', (canvas_width, canvas_height), 'white')
+    
+    # Paste the QR in the center
+    canvas.paste(img, (50, 50))
+    
+    # Optional: Add "SCAN TO PAY" text at the bottom if needed, 
+    # but keeping it simple and clean as requested.
+    
     buffered = BytesIO()
-    img.save(buffered, format="PNG")
+    canvas.save(buffered, format="PNG")
     img_str = base64.b64encode(buffered.getvalue()).decode()
     href = f'<a href="data:file/png;base64,{img_str}" download="{filename}" style="text-decoration:none;"><button style="width:100%; border-radius:10px; padding:10px; background:#10b981; color:white; border:none; cursor:pointer; font-weight:600;">{text}</button></a>'
     return href
@@ -153,7 +166,7 @@ with st.container():
                 st.success(f"QR Generated successfully at {time.strftime('%H:%M:%S')}")
                 
                 # Download Button
-                st.markdown(get_image_download_link(qr_img, "UPI_QR.png", "📥 Download QR Image"), unsafe_allow_html=True)
+                st.markdown(get_image_download_link(qr_img, "UPI_QR_Standee.png", "📥 Download Professional QR"), unsafe_allow_html=True)
     
     st.markdown('</div>', unsafe_allow_html=True)
 
