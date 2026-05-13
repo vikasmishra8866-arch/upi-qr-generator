@@ -92,20 +92,36 @@ def generate_qr(upi_url):
     return img
 
 def get_image_download_link(img, filename, text):
-    # Professional Standee Look Logic
-    # Adding a white border and space for a cleaner layout
-    canvas_width = img.width + 100
-    canvas_height = img.height + 150
+    # --- Create Premium Standee Look ---
+    card_width = 500
+    card_height = 700
     
-    # Create a white background canvas
-    canvas = Image.new('RGB', (canvas_width, canvas_height), 'white')
+    # Create white canvas
+    canvas = Image.new('RGB', (card_width, card_height), 'white')
+    draw = ImageDraw.Draw(canvas)
     
-    # Paste the QR in the center
-    canvas.paste(img, (50, 50))
+    # 1. Add Blue Header Bar
+    draw.rectangle([0, 0, card_width, 100], fill='#1e293b')
     
-    # Optional: Add "SCAN TO PAY" text at the bottom if needed, 
-    # but keeping it simple and clean as requested.
+    # 2. Add Header Text "SCAN & PAY"
+    # Using default font logic to ensure it works everywhere
+    try:
+        draw.text((card_width//2 - 90, 30), "SCAN & PAY", fill="white", size=40)
+    except:
+        draw.text((card_width//2 - 60, 35), "SCAN TO PAY", fill="white")
+        
+    # 3. Resize and Paste QR
+    qr_resized = img.resize((380, 380), Image.Resampling.LANCZOS)
+    canvas.paste(qr_resized, (60, 150))
     
+    # 4. Add Decorative Border around QR
+    draw.rectangle([55, 145, 445, 535], outline='#e2e8f0', width=2)
+    
+    # 5. Add Bottom Branding Text
+    branding_text = "Google Pay | PhonePe | Paytm | BHIM UPI"
+    draw.text((card_width//2 - 140, 600), branding_text, fill="#64748b")
+    draw.text((card_width//2 - 80, 640), "Secure Digital Payment", fill="#94a3b8")
+
     buffered = BytesIO()
     canvas.save(buffered, format="PNG")
     img_str = base64.b64encode(buffered.getvalue()).decode()
@@ -166,7 +182,7 @@ with st.container():
                 st.success(f"QR Generated successfully at {time.strftime('%H:%M:%S')}")
                 
                 # Download Button
-                st.markdown(get_image_download_link(qr_img, "UPI_QR_Standee.png", "📥 Download Professional QR"), unsafe_allow_html=True)
+                st.markdown(get_image_download_link(qr_img, "Premium_UPI_QR.png", "📥 Download Premium QR Card"), unsafe_allow_html=True)
     
     st.markdown('</div>', unsafe_allow_html=True)
 
