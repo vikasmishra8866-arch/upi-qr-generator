@@ -88,7 +88,8 @@ def generate_qr(upi_url):
     qr = qrcode.QRCode(version=1, box_size=10, border=2)
     qr.add_data(upi_url)
     qr.make(fit=True)
-    img = qr.make_image(fill_color="#1e293b", back_color="white")
+    # SOLUTION: Added .convert('RGB') to make it compatible with Streamlit and PIL
+    img = qr.make_image(fill_color="#1e293b", back_color="white").convert('RGB')
     return img
 
 def get_image_download_link(img, filename, text):
