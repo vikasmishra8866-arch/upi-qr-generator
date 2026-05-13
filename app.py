@@ -167,6 +167,7 @@ def create_premium_standee(
     detail_font = get_font(34, True)
     footer_font = get_font(30, True)
     small_font = get_font(24)
+    instruction_font = get_font(34, True)
 
     # ---------------------------------------------------
     # TOP DESIGN
@@ -202,6 +203,17 @@ def create_premium_standee(
     draw.line((810,315,920,315), fill="white", width=3)
 
     # ---------------------------------------------------
+    # NEW TEXT ABOVE QR
+    # ---------------------------------------------------
+
+    draw.text(
+        (300,365),
+        "Scan and Pay using any UPI app",
+        fill="white",
+        font=instruction_font
+    )
+
+    # ---------------------------------------------------
     # QR SHADOW
     # ---------------------------------------------------
 
@@ -231,7 +243,15 @@ def create_premium_standee(
         width=5
     )
 
+    # ---------------------------------------------------
+    # QR RESIZE
+    # ---------------------------------------------------
+
     qr_resized = qr_image.resize((620,620))
+
+    # ---------------------------------------------------
+    # QR POSITION
+    # ---------------------------------------------------
 
     canvas.paste(qr_resized, (290,500))
 
