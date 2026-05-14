@@ -70,6 +70,7 @@ div.stButton > button{
     text-align:center;
     margin-top:40px;
     color:#cbd5e1;
+    font-size:18px;
 }
 
 </style>
@@ -101,15 +102,32 @@ def generate_qr(upi_url):
 
 def get_font(size, bold=False):
 
-    try:
+    font_paths = []
 
-        if bold:
-            return ImageFont.truetype("arialbd.ttf", size)
+    if bold:
 
-        return ImageFont.truetype("arial.ttf", size)
+        font_paths = [
+            "DejaVuSans-Bold.ttf",
+            "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf",
+            "/usr/share/fonts/truetype/liberation2/LiberationSans-Bold.ttf"
+        ]
 
-    except:
-        return ImageFont.load_default()
+    else:
+
+        font_paths = [
+            "DejaVuSans.ttf",
+            "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf",
+            "/usr/share/fonts/truetype/liberation2/LiberationSans-Regular.ttf"
+        ]
+
+    for path in font_paths:
+
+        try:
+            return ImageFont.truetype(path, size)
+        except:
+            continue
+
+    return ImageFont.load_default()
 
 # =====================================================
 # PREMIUM QR IMAGE
@@ -158,14 +176,14 @@ def create_premium_qr(
     # FONTS
     # =================================================
 
-    title_font = get_font(95, True)
-    sub_font = get_font(50, False)
-    instruction_font = get_font(48, True)
-    amount_font = get_font(68, True)
-    detail_font = get_font(42, True)
-    badge_font = get_font(34, True)
-    footer_font = get_font(36, True)
-    small_font = get_font(30, False)
+    title_font = get_font(110, True)
+    sub_font = get_font(56, False)
+    instruction_font = get_font(62, True)
+    amount_font = get_font(78, True)
+    detail_font = get_font(52, True)
+    badge_font = get_font(38, True)
+    footer_font = get_font(46, True)
+    small_font = get_font(34, False)
 
     # =================================================
     # HEADER DESIGN
@@ -177,7 +195,7 @@ def create_premium_qr(
     draw.ellipse((640,120,720,200), fill="#22c55e")
 
     draw.text(
-        (667,132),
+        (667,130),
         "✓",
         fill="white",
         font=detail_font
@@ -188,25 +206,21 @@ def create_premium_qr(
     # =================================================
 
     draw.text(
-        (170,230),
+        (120,220),
         "SCAN FOR PAYMENT",
         fill="white",
         font=title_font
     )
 
     draw.text(
-        (470,350),
+        (430,355),
         "Secure UPI Payment",
         fill="#e2e8f0",
         font=sub_font
     )
 
-    # =================================================
-    # IMPORTANT FIXED TEXT
-    # =================================================
-
     draw.text(
-        (250,470),
+        (180,470),
         "Scan and Pay using any UPI App",
         fill="white",
         font=instruction_font
@@ -261,7 +275,7 @@ def create_premium_qr(
     )
 
     draw.text(
-        (450,1535),
+        (400,1530),
         f"Amount : ₹{amount}",
         fill="#facc15",
         font=amount_font
@@ -272,14 +286,14 @@ def create_premium_qr(
     # =================================================
 
     draw.text(
-        (220,1710),
+        (180,1710),
         f"Merchant Name : {merchant_name}",
         fill="#1e293b",
         font=detail_font
     )
 
     draw.text(
-        (220,1790),
+        (180,1795),
         f"UPI ID : {upi_id}",
         fill="#1e293b",
         font=detail_font
@@ -296,7 +310,7 @@ def create_premium_qr(
     )
 
     draw.text(
-        (510,1835),
+        (470,1825),
         "SUPPORTED ON",
         fill="#2563eb",
         font=footer_font
@@ -324,7 +338,7 @@ def create_premium_qr(
         )
 
         draw.text(
-            (x+28,1948),
+            (x+20,1942),
             app,
             fill="#1e293b",
             font=badge_font
