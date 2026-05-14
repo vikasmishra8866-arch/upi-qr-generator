@@ -52,7 +52,7 @@ st.markdown("""
     text-align:center;
     color:#cbd5e1;
     margin-bottom:35px;
-    font-size:18px;
+    font-size:20px;
 }
 
 div.stButton > button{
@@ -64,11 +64,6 @@ div.stButton > button{
     font-weight:700;
     color:white;
     background: linear-gradient(90deg,#2563eb,#9333ea);
-    transition:0.3s;
-}
-
-div.stButton > button:hover{
-    transform:translateY(-2px);
 }
 
 .footer{
@@ -95,12 +90,10 @@ def generate_qr(upi_url):
     qr.add_data(upi_url)
     qr.make(fit=True)
 
-    img = qr.make_image(
+    return qr.make_image(
         fill_color="black",
         back_color="white"
     ).convert("RGB")
-
-    return img
 
 # =====================================================
 # FONT LOADER
@@ -119,228 +112,211 @@ def get_font(size, bold=False):
         return ImageFont.load_default()
 
 # =====================================================
-# PREMIUM DOWNLOAD IMAGE
+# PREMIUM QR IMAGE
 # =====================================================
 
-def create_premium_qr_card(
+def create_premium_qr(
     qr_img,
     amount,
     merchant_name,
     upi_id
 ):
 
-    WIDTH = 1300
-    HEIGHT = 1900
+    WIDTH = 1400
+    HEIGHT = 2100
 
-    canvas = Image.new("RGB", (WIDTH, HEIGHT), "#eef4ff")
+    canvas = Image.new("RGB", (WIDTH, HEIGHT), "#edf4ff")
     draw = ImageDraw.Draw(canvas)
 
-    # -------------------------------------------------
-    # SHADOW
-    # -------------------------------------------------
-
-    shadow = Image.new("RGBA", (WIDTH, HEIGHT), (0,0,0,0))
-
-    shadow_draw = ImageDraw.Draw(shadow)
-
-    shadow_draw.rounded_rectangle(
-        [70,70,1230,1830],
-        radius=50,
-        fill=(0,0,0,80)
-    )
-
-    shadow = shadow.filter(ImageFilter.GaussianBlur(25))
-
-    canvas.paste(shadow, (0,0), shadow)
-
-    # -------------------------------------------------
+    # =================================================
     # MAIN CARD
-    # -------------------------------------------------
+    # =================================================
 
     draw.rounded_rectangle(
-        [50,50,1210,1810],
-        radius=45,
+        [60,60,1340,2020],
+        radius=55,
         fill="white"
     )
 
-    # -------------------------------------------------
+    # =================================================
     # HEADER GRADIENT
-    # -------------------------------------------------
+    # =================================================
 
-    for i in range(360):
+    for i in range(430):
 
-        r = 20 + int(i * 0.10)
-        g = 40 + int(i * 0.05)
-        b = 130 + int(i * 0.25)
+        r = 25 + int(i * 0.08)
+        g = 35 + int(i * 0.04)
+        b = 140 + int(i * 0.20)
 
         draw.line(
-            [(50,50+i),(1210,50+i)],
+            [(60,60+i),(1340,60+i)],
             fill=(r,g,b),
             width=1
         )
 
-    # -------------------------------------------------
+    # =================================================
     # FONTS
-    # -------------------------------------------------
+    # =================================================
 
-    title_font = get_font(82, True)
-    subtitle_font = get_font(40, False)
-    instruction_font = get_font(42, True)
-    amount_font = get_font(60, True)
-    detail_font = get_font(38, True)
-    small_font = get_font(28, False)
-    footer_font = get_font(34, True)
+    title_font = get_font(95, True)
+    sub_font = get_font(50, False)
+    instruction_font = get_font(48, True)
+    amount_font = get_font(68, True)
+    detail_font = get_font(42, True)
+    badge_font = get_font(34, True)
+    footer_font = get_font(36, True)
+    small_font = get_font(30, False)
 
-    # -------------------------------------------------
+    # =================================================
     # HEADER DESIGN
-    # -------------------------------------------------
+    # =================================================
 
-    draw.line((300,150,470,150), fill="white", width=5)
-    draw.line((790,150,960,150), fill="white", width=5)
+    draw.line((320,170,500,170), fill="white", width=5)
+    draw.line((900,170,1080,170), fill="white", width=5)
 
-    draw.ellipse((595,100,665,170), fill="#22c55e")
+    draw.ellipse((640,120,720,200), fill="#22c55e")
 
     draw.text(
-        (620,112),
+        (667,132),
         "✓",
         fill="white",
         font=detail_font
     )
 
-    # -------------------------------------------------
-    # HEADER TEXT
-    # -------------------------------------------------
+    # =================================================
+    # MAIN TEXT
+    # =================================================
 
     draw.text(
-        (170,190),
+        (170,230),
         "SCAN FOR PAYMENT",
         fill="white",
         font=title_font
     )
 
     draw.text(
-        (420,295),
+        (470,350),
         "Secure UPI Payment",
         fill="#e2e8f0",
-        font=subtitle_font
+        font=sub_font
     )
 
-    # -------------------------------------------------
-    # QR INSTRUCTION TEXT
-    # -------------------------------------------------
+    # =================================================
+    # IMPORTANT FIXED TEXT
+    # =================================================
 
     draw.text(
-        (250,390),
+        (250,470),
         "Scan and Pay using any UPI App",
-        fill="#ffffff",
+        fill="white",
         font=instruction_font
     )
 
-    # -------------------------------------------------
-    # QR BOX SHADOW
-    # -------------------------------------------------
+    # =================================================
+    # QR SHADOW
+    # =================================================
 
-    qr_shadow = Image.new("RGBA", (WIDTH, HEIGHT), (0,0,0,0))
+    shadow = Image.new("RGBA", (WIDTH, HEIGHT), (0,0,0,0))
 
-    qr_shadow_draw = ImageDraw.Draw(qr_shadow)
+    shadow_draw = ImageDraw.Draw(shadow)
 
-    qr_shadow_draw.rounded_rectangle(
-        [220,460,1080,1320],
-        radius=45,
-        fill=(0,0,0,60)
+    shadow_draw.rounded_rectangle(
+        [250,560,1150,1460],
+        radius=50,
+        fill=(0,0,0,70)
     )
 
-    qr_shadow = qr_shadow.filter(ImageFilter.GaussianBlur(18))
+    shadow = shadow.filter(ImageFilter.GaussianBlur(22))
 
-    canvas.paste(qr_shadow, (0,0), qr_shadow)
+    canvas.paste(shadow, (0,0), shadow)
 
-    # -------------------------------------------------
+    # =================================================
     # QR BOX
-    # -------------------------------------------------
+    # =================================================
 
     draw.rounded_rectangle(
-        [210,450,1070,1310],
-        radius=45,
+        [240,550,1140,1450],
+        radius=50,
         fill="white",
         outline="#2563eb",
-        width=5
+        width=6
     )
 
-    # -------------------------------------------------
+    # =================================================
     # QR IMAGE
-    # -------------------------------------------------
+    # =================================================
 
-    qr_resized = qr_img.resize((680,680))
+    qr_resized = qr_img.resize((720,720))
 
-    canvas.paste(qr_resized, (310,540))
+    canvas.paste(qr_resized, (340,640))
 
-    # -------------------------------------------------
+    # =================================================
     # AMOUNT BOX
-    # -------------------------------------------------
+    # =================================================
 
     draw.rounded_rectangle(
-        [340,1360,920,1460],
-        radius=28,
+        [360,1510,1040,1620],
+        radius=30,
         fill="#1d4ed8"
     )
 
     draw.text(
-        (420,1385),
+        (450,1535),
         f"Amount : ₹{amount}",
         fill="#facc15",
         font=amount_font
     )
 
-    # -------------------------------------------------
-    # MERCHANT DETAILS
-    # -------------------------------------------------
+    # =================================================
+    # DETAILS
+    # =================================================
 
     draw.text(
-        (220,1530),
+        (220,1710),
         f"Merchant Name : {merchant_name}",
         fill="#1e293b",
         font=detail_font
     )
 
     draw.text(
-        (220,1605),
+        (220,1790),
         f"UPI ID : {upi_id}",
         fill="#1e293b",
         font=detail_font
     )
 
-    # -------------------------------------------------
-    # SUPPORTED TEXT
-    # -------------------------------------------------
+    # =================================================
+    # SUPPORTED SECTION
+    # =================================================
 
     draw.line(
-        (150,1690,1110,1690),
+        (150,1885,1250,1885),
         fill="#cbd5e1",
         width=3
     )
 
     draw.text(
-        (500,1650),
+        (510,1835),
         "SUPPORTED ON",
         fill="#2563eb",
         font=footer_font
     )
 
-    # -------------------------------------------------
-    # PAYMENT BADGES
-    # -------------------------------------------------
+    # =================================================
+    # BADGES
+    # =================================================
 
     apps = [
         ("Google Pay", 120),
-        ("PhonePe", 390),
-        ("Paytm", 660),
-        ("BHIM", 930)
+        ("PhonePe", 420),
+        ("Paytm", 720),
+        ("BHIM", 1020)
     ]
 
     for app, x in apps:
 
         draw.rounded_rectangle(
-            [x,1730,x+220,1810],
+            [x,1920,x+240,2010],
             radius=20,
             fill="white",
             outline="#2563eb",
@@ -348,10 +324,10 @@ def create_premium_qr_card(
         )
 
         draw.text(
-            (x+30,1755),
+            (x+28,1948),
             app,
             fill="#1e293b",
-            font=small_font
+            font=badge_font
         )
 
     return canvas
@@ -364,16 +340,13 @@ def get_download_button(img):
 
     buffered = BytesIO()
 
-    img.save(
-        buffered,
-        format="PNG"
-    )
+    img.save(buffered, format="PNG")
 
     img_str = base64.b64encode(
         buffered.getvalue()
     ).decode()
 
-    href = f"""
+    return f"""
     <a href="data:file/png;base64,{img_str}"
     download="Premium_UPI_QR.png"
     style="text-decoration:none;">
@@ -396,8 +369,6 @@ def get_download_button(img):
     </a>
     """
 
-    return href
-
 # =====================================================
 # UI
 # =====================================================
@@ -408,7 +379,7 @@ st.markdown(
 )
 
 st.markdown(
-    '<div class="sub">Generate Secure Payment QR Instantly</div>',
+    '<div class="sub">Generate Secure Premium UPI QR Instantly</div>',
     unsafe_allow_html=True
 )
 
@@ -467,7 +438,7 @@ with st.container():
 
             qr_img = generate_qr(upi_url)
 
-            final_image = create_premium_qr_card(
+            final_img = create_premium_qr(
                 qr_img,
                 amount,
                 merchant_name,
@@ -477,12 +448,12 @@ with st.container():
             st.success("✅ Premium QR Generated Successfully!")
 
             st.image(
-                final_image,
+                final_img,
                 use_container_width=True
             )
 
             st.markdown(
-                get_download_button(final_image),
+                get_download_button(final_img),
                 unsafe_allow_html=True
             )
 
