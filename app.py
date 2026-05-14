@@ -110,22 +110,30 @@ if generate_btn:
         qr.make(fit=True)
         qr_img = qr.make_image(fill_color="black", back_color="white").convert('RGB')
         
-        # --- PILLOW: CUSTOM CANVAS FOR DOWNLOAD ---
+        # --- PILLOW: INCREASED TEXT SIZE FOR DOWNLOAD ---
         q_w, q_h = qr_img.size
         c_w = q_w + 100
-        c_h = q_h + 160
+        c_h = q_h + 200 # Space for larger text
         canvas = Image.new('RGB', (c_w, c_h), 'white')
         draw = ImageDraw.Draw(canvas)
         
+        # Text to be drawn
         header_text = "SCAN AND PAY ANY UPI APP"
-        footer_text = f"Amount: INR {amount}"
+        footer_text = f"Amount: ₹{amount}"
         
-        # Paste QR in center
-        canvas.paste(qr_img, (50, 80))
+        # Note: Streamlit Cloud/Github usually has a default font. 
+        # Using a simple trick to simulate "bold/large" without external .ttf files
+        def draw_bold_text(draw, position, text, fill="black"):
+            x, y = position
+            draw.text((x, y), text, fill=fill)
+            draw.text((x+1, y), text, fill=fill) # Offset for boldness
+
+        # Paste QR Code
+        canvas.paste(qr_img, (50, 100))
         
-        # Draw labels
-        draw.text((c_w//2 - 80, 40), header_text, fill="black")
-        draw.text((c_w//2 - 50, c_h - 60), footer_text, fill="black")
+        # Draw Larger Labels (Centered)
+        draw_bold_text(draw, (c_w//2 - 100, 40), header_text)
+        draw_bold_text(draw, (c_w//2 - 60, c_h - 60), footer_text)
 
         buf = io.BytesIO()
         canvas.save(buf, format="PNG")
