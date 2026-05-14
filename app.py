@@ -6,6 +6,7 @@ from PIL import Image, ImageDraw, ImageFont, ImageFilter
 from io import BytesIO
 import base64
 import time
+import os
 
 # =====================================================
 # PAGE CONFIG
@@ -70,7 +71,6 @@ div.stButton > button{
     text-align:center;
     margin-top:40px;
     color:#cbd5e1;
-    font-size:18px;
 }
 
 </style>
@@ -97,35 +97,34 @@ def generate_qr(upi_url):
     ).convert("RGB")
 
 # =====================================================
-# FONT LOADER
+# FONT LOADER FIXED
 # =====================================================
 
 def get_font(size, bold=False):
 
-    font_paths = []
+    font_paths = [
+        "C:/Windows/Fonts/arial.ttf",
+        "C:/Windows/Fonts/Arial.ttf",
+        "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf"
+    ]
 
-    if bold:
+    bold_paths = [
+        "C:/Windows/Fonts/arialbd.ttf",
+        "C:/Windows/Fonts/Arial Bold.ttf",
+        "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf"
+    ]
 
-        font_paths = [
-            "DejaVuSans-Bold.ttf",
-            "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf",
-            "/usr/share/fonts/truetype/liberation2/LiberationSans-Bold.ttf"
-        ]
+    paths = bold_paths if bold else font_paths
 
-    else:
+    for path in paths:
 
-        font_paths = [
-            "DejaVuSans.ttf",
-            "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf",
-            "/usr/share/fonts/truetype/liberation2/LiberationSans-Regular.ttf"
-        ]
+        if os.path.exists(path):
 
-    for path in font_paths:
+            try:
+                return ImageFont.truetype(path, size)
 
-        try:
-            return ImageFont.truetype(path, size)
-        except:
-            continue
+            except:
+                pass
 
     return ImageFont.load_default()
 
@@ -173,17 +172,17 @@ def create_premium_qr(
         )
 
     # =================================================
-    # FONTS
+    # FONTS FIXED
     # =================================================
 
     title_font = get_font(110, True)
-    sub_font = get_font(56, False)
+    sub_font = get_font(58)
     instruction_font = get_font(62, True)
     amount_font = get_font(78, True)
-    detail_font = get_font(52, True)
-    badge_font = get_font(38, True)
-    footer_font = get_font(46, True)
-    small_font = get_font(34, False)
+    detail_font = get_font(50, True)
+    badge_font = get_font(40, True)
+    footer_font = get_font(44, True)
+    small_font = get_font(34)
 
     # =================================================
     # HEADER DESIGN
@@ -195,7 +194,7 @@ def create_premium_qr(
     draw.ellipse((640,120,720,200), fill="#22c55e")
 
     draw.text(
-        (667,130),
+        (667,132),
         "✓",
         fill="white",
         font=detail_font
@@ -206,21 +205,25 @@ def create_premium_qr(
     # =================================================
 
     draw.text(
-        (120,220),
+        (150,220),
         "SCAN FOR PAYMENT",
         fill="white",
         font=title_font
     )
 
     draw.text(
-        (430,355),
+        (430,350),
         "Secure UPI Payment",
         fill="#e2e8f0",
         font=sub_font
     )
 
+    # =================================================
+    # FIXED VISIBLE TEXT
+    # =================================================
+
     draw.text(
-        (180,470),
+        (160,470),
         "Scan and Pay using any UPI App",
         fill="white",
         font=instruction_font
@@ -293,7 +296,7 @@ def create_premium_qr(
     )
 
     draw.text(
-        (180,1795),
+        (180,1790),
         f"UPI ID : {upi_id}",
         fill="#1e293b",
         font=detail_font
@@ -310,7 +313,7 @@ def create_premium_qr(
     )
 
     draw.text(
-        (470,1825),
+        (470,1835),
         "SUPPORTED ON",
         fill="#2563eb",
         font=footer_font
@@ -338,7 +341,7 @@ def create_premium_qr(
         )
 
         draw.text(
-            (x+20,1942),
+            (x+30,1948),
             app,
             fill="#1e293b",
             font=badge_font
