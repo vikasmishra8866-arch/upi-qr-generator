@@ -223,7 +223,7 @@ def create_premium_qr(
     # =================================================
 
     draw.text(
-        (160,470),
+        (500,1000),
         "Scan and Pay using any UPI App",
         fill="white",
         font=instruction_font
