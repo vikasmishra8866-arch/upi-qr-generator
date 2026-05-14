@@ -1,486 +1,236 @@
-# app.py
-
 import streamlit as st
 import qrcode
-from PIL import Image, ImageDraw, ImageFont, ImageFilter
-from io import BytesIO
+from PIL import Image
+import io
 import base64
-import time
-import os
 
-# =====================================================
-# PAGE CONFIG
-# =====================================================
-
+# --- PAGE CONFIGURATION ---
 st.set_page_config(
     page_title="Premium UPI QR Generator",
-    page_icon="💳",
-    layout="centered"
+    page_icon="💸",
+    layout="centered",
+    initial_sidebar_state="collapsed",
 )
 
-# =====================================================
-# PREMIUM CSS
-# =====================================================
+# --- CUSTOM CSS FOR PREMIUM UI ---
+def local_css():
+    st.markdown("""
+        <style>
+        /* Main Background */
+        .stApp {
+            background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+            color: #ffffff;
+        }
+
+        /* Glassmorphism Card Effect */
+        .main-card {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 30px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+            margin-bottom: 20px;
+        }
+
+        /* Typography */
+        h1 {
+            font-family: 'Inter', sans-serif;
+            font-weight: 800;
+            background: -webkit-linear-gradient(#fff, #a5a5a5);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-align: center;
+            margin-bottom: 5px !important;
+        }
+        
+        .sub-heading {
+            text-align: center;
+            color: #b0b0b0;
+            font-size: 1.1rem;
+            margin-bottom: 40px;
+        }
+
+        /* Input Styling */
+        div[data-baseweb="select"] > div, div[data-baseweb="input"] > div {
+            background-color: rgba(255, 255, 255, 0.07) !important;
+            border-radius: 12px !important;
+            border: 1px solid rgba(255, 255, 255, 0.1) !important;
+            color: white !important;
+        }
+
+        /* Button Styling */
+        .stButton > button {
+            width: 100%;
+            background: linear-gradient(90deg, #4776E6 0%, #8E54E9 100%);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 12px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(142, 84, 233, 0.3);
+        }
+
+        .stButton > button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(142, 84, 233, 0.5);
+            color: white;
+        }
+
+        /* QR Display Card */
+        .qr-display-container {
+            background: white;
+            padding: 20px;
+            border-radius: 20px;
+            text-align: center;
+            color: #1a1a1a;
+            margin-top: 20px;
+        }
+
+        .upi-badge {
+            display: inline-block;
+            background: #f0f0f0;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            color: #666;
+            margin-top: 10px;
+        }
+
+        /* Footer */
+        .footer {
+            text-align: center;
+            margin-top: 50px;
+            color: #666;
+            font-size: 0.8rem;
+            letter-spacing: 1px;
+        }
+        
+        /* Preset Buttons Row */
+        .preset-container {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        </style>
+    """, unsafe_allow_html=True)
 
-st.markdown("""
-<style>
+local_css()
 
-.stApp{
-    background: radial-gradient(circle at top,#1e3a8a,#020617 70%);
-    color:white;
-}
+# --- APP LAYOUT ---
+st.markdown("<h1>Premium UPI QR Generator</h1>", unsafe_allow_html=True)
+st.markdown("<p class='sub-heading'>Generate stylish UPI payment QR codes instantly</p>", unsafe_allow_html=True)
 
-.main-card{
-    background: rgba(255,255,255,0.06);
-    backdrop-filter: blur(18px);
-    border-radius:30px;
-    padding:35px;
-    border:1px solid rgba(255,255,255,0.08);
-    box-shadow:0 20px 60px rgba(0,0,0,0.45);
-}
-
-.title{
-    text-align:center;
-    font-size:52px;
-    font-weight:800;
-    background: linear-gradient(90deg,#38bdf8,#8b5cf6);
-    -webkit-background-clip:text;
-    -webkit-text-fill-color:transparent;
-    margin-bottom:8px;
-}
-
-.sub{
-    text-align:center;
-    color:#cbd5e1;
-    margin-bottom:35px;
-    font-size:20px;
-}
-
-div.stButton > button{
-    width:100%;
-    border:none;
-    border-radius:14px;
-    padding:15px;
-    font-size:18px;
-    font-weight:700;
-    color:white;
-    background: linear-gradient(90deg,#2563eb,#9333ea);
-}
-
-.footer{
-    text-align:center;
-    margin-top:40px;
-    color:#cbd5e1;
-}
-
-</style>
-""", unsafe_allow_html=True)
-
-# =====================================================
-# QR GENERATOR
-# =====================================================
-
-def generate_qr(upi_url):
-
-    qr = qrcode.QRCode(
-        version=1,
-        box_size=18,
-        border=2
-    )
-
-    qr.add_data(upi_url)
-    qr.make(fit=True)
-
-    return qr.make_image(
-        fill_color="black",
-        back_color="white"
-    ).convert("RGB")
-
-# =====================================================
-# FONT LOADER FIXED
-# =====================================================
-
-def get_font(size, bold=False):
-
-    font_paths = [
-        "C:/Windows/Fonts/arial.ttf",
-        "C:/Windows/Fonts/Arial.ttf",
-        "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf"
-    ]
-
-    bold_paths = [
-        "C:/Windows/Fonts/arialbd.ttf",
-        "C:/Windows/Fonts/Arial Bold.ttf",
-        "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf"
-    ]
-
-    paths = bold_paths if bold else font_paths
-
-    for path in paths:
-
-        if os.path.exists(path):
-
-            try:
-                return ImageFont.truetype(path, size)
-
-            except:
-                pass
-
-    return ImageFont.load_default()
-
-# =====================================================
-# PREMIUM QR IMAGE
-# =====================================================
-
-def create_premium_qr(
-    qr_img,
-    amount,
-    merchant_name,
-    upi_id
-):
-
-    WIDTH = 1400
-    HEIGHT = 2100
-
-    canvas = Image.new("RGB", (WIDTH, HEIGHT), "#edf4ff")
-    draw = ImageDraw.Draw(canvas)
-
-    # =================================================
-    # MAIN CARD
-    # =================================================
-
-    draw.rounded_rectangle(
-        [60,60,1340,2020],
-        radius=55,
-        fill="white"
-    )
-
-    # =================================================
-    # HEADER GRADIENT
-    # =================================================
-
-    for i in range(430):
-
-        r = 25 + int(i * 0.08)
-        g = 35 + int(i * 0.04)
-        b = 140 + int(i * 0.20)
-
-        draw.line(
-            [(60,60+i),(1340,60+i)],
-            fill=(r,g,b),
-            width=1
-        )
-
-    # =================================================
-    # FONTS FIXED
-    # =================================================
-
-    title_font = get_font(110, True)
-    sub_font = get_font(58)
-    instruction_font = get_font(62, True)
-    amount_font = get_font(78, True)
-    detail_font = get_font(50, True)
-    badge_font = get_font(40, True)
-    footer_font = get_font(44, True)
-    small_font = get_font(34)
-
-    # =================================================
-    # HEADER DESIGN
-    # =================================================
-
-    draw.line((320,170,500,170), fill="white", width=5)
-    draw.line((900,170,1080,170), fill="white", width=5)
-
-    draw.ellipse((640,120,720,200), fill="#22c55e")
-
-    draw.text(
-        (667,132),
-        "✓",
-        fill="white",
-        font=detail_font
-    )
-
-    # =================================================
-    # MAIN TEXT
-    # =================================================
-
-    draw.text(
-        (150,220),
-        "SCAN FOR PAYMENT",
-        fill="white",
-        font=title_font
-    )
-
-    draw.text(
-        (430,350),
-        "Secure UPI Payment",
-        fill="#e2e8f0",
-        font=sub_font
-    )
-
-    # =================================================
-    # FIXED VISIBLE TEXT
-    # =================================================
-
-    draw.text(
-        (500,1000),
-        "Scan and Pay using any UPI App",
-        fill="white",
-        font=instruction_font
-    )
-
-    # =================================================
-    # QR SHADOW
-    # =================================================
-
-    shadow = Image.new("RGBA", (WIDTH, HEIGHT), (0,0,0,0))
-
-    shadow_draw = ImageDraw.Draw(shadow)
-
-    shadow_draw.rounded_rectangle(
-        [250,560,1150,1460],
-        radius=50,
-        fill=(0,0,0,70)
-    )
-
-    shadow = shadow.filter(ImageFilter.GaussianBlur(22))
-
-    canvas.paste(shadow, (0,0), shadow)
-
-    # =================================================
-    # QR BOX
-    # =================================================
-
-    draw.rounded_rectangle(
-        [240,550,1140,1450],
-        radius=50,
-        fill="white",
-        outline="#2563eb",
-        width=6
-    )
-
-    # =================================================
-    # QR IMAGE
-    # =================================================
-
-    qr_resized = qr_img.resize((720,720))
-
-    canvas.paste(qr_resized, (340,640))
-
-    # =================================================
-    # AMOUNT BOX
-    # =================================================
-
-    draw.rounded_rectangle(
-        [360,1510,1040,1620],
-        radius=30,
-        fill="#1d4ed8"
-    )
-
-    draw.text(
-        (400,1530),
-        f"Amount : ₹{amount}",
-        fill="#facc15",
-        font=amount_font
-    )
-
-    # =================================================
-    # DETAILS
-    # =================================================
-
-    draw.text(
-        (180,1710),
-        f"Merchant Name : {merchant_name}",
-        fill="#1e293b",
-        font=detail_font
-    )
-
-    draw.text(
-        (180,1790),
-        f"UPI ID : {upi_id}",
-        fill="#1e293b",
-        font=detail_font
-    )
-
-    # =================================================
-    # SUPPORTED SECTION
-    # =================================================
-
-    draw.line(
-        (150,1885,1250,1885),
-        fill="#cbd5e1",
-        width=3
-    )
-
-    draw.text(
-        (470,1835),
-        "SUPPORTED ON",
-        fill="#2563eb",
-        font=footer_font
-    )
-
-    # =================================================
-    # BADGES
-    # =================================================
-
-    apps = [
-        ("Google Pay", 120),
-        ("PhonePe", 420),
-        ("Paytm", 720),
-        ("BHIM", 1020)
-    ]
-
-    for app, x in apps:
-
-        draw.rounded_rectangle(
-            [x,1920,x+240,2010],
-            radius=20,
-            fill="white",
-            outline="#2563eb",
-            width=3
-        )
-
-        draw.text(
-            (x+30,1948),
-            app,
-            fill="#1e293b",
-            font=badge_font
-        )
-
-    return canvas
-
-# =====================================================
-# DOWNLOAD BUTTON
-# =====================================================
-
-def get_download_button(img):
-
-    buffered = BytesIO()
-
-    img.save(buffered, format="PNG")
-
-    img_str = base64.b64encode(
-        buffered.getvalue()
-    ).decode()
-
-    return f"""
-    <a href="data:file/png;base64,{img_str}"
-    download="Premium_UPI_QR.png"
-    style="text-decoration:none;">
-
-    <button style="
-    width:100%;
-    padding:18px;
-    border:none;
-    border-radius:14px;
-    background:linear-gradient(90deg,#22c55e,#06b6d4);
-    color:white;
-    font-size:22px;
-    font-weight:700;
-    cursor:pointer;
-    margin-top:20px;
-    ">
-    ⬇ DOWNLOAD PREMIUM QR
-    </button>
-
-    </a>
-    """
-
-# =====================================================
-# UI
-# =====================================================
-
-st.markdown(
-    '<div class="title">Instant UPI QR Generator</div>',
-    unsafe_allow_html=True
-)
-
-st.markdown(
-    '<div class="sub">Generate Secure Premium UPI QR Instantly</div>',
-    unsafe_allow_html=True
-)
-
+# Main Container
 with st.container():
-
-    st.markdown(
-        '<div class="main-card">',
-        unsafe_allow_html=True
-    )
-
-    upi_options = [
-        "9696159863.wallet@phonepe",
-        "9696159863@ibl"
-    ]
-
+    st.markdown('<div class="main-card">', unsafe_allow_html=True)
+    
+    # UPI ID Section
+    upi_suggestions = ["9696159863.wallet@phonepe", "9696159863@ibl"]
     selected_upi = st.selectbox(
-        "Select UPI ID",
-        upi_options
+        "Enter or Select UPI ID",
+        options=upi_suggestions,
+        index=0,
+        help="Select a predefined UPI ID or type your own",
+        placeholder="Type your UPI ID...",
     )
+    
+    # Manual Override (if user types custom)
+    custom_upi = st.text_input("Or type custom UPI ID manually", value=selected_upi)
+    final_upi = custom_upi if custom_upi else selected_upi
 
-    st.write("### Quick Amount Selection")
+    st.write("---")
 
-    c1,c2,c3,c4 = st.columns(4)
+    # Amount Section
+    st.markdown("<b>Select or Enter Amount (INR)</b>", unsafe_allow_html=True)
+    
+    # Preset Buttons Logic
+    col1, col2, col3, col4 = st.columns(4)
+    preset_amt = None
+    if col1.button("₹50"): preset_amt = 50
+    if col2.button("₹100"): preset_amt = 100
+    if col3.button("₹150"): preset_amt = 150
+    if col4.button("₹200"): preset_amt = 200
 
-    if c1.button("₹50"):
-        st.session_state.amount = 50
+    # Amount Input
+    if preset_amt:
+        amount = st.number_input("Enter Amount", min_value=1.0, value=float(preset_amt), step=1.0)
+    else:
+        amount = st.number_input("Enter Amount", min_value=1.0, value=1.0, step=1.0)
 
-    if c2.button("₹100"):
-        st.session_state.amount = 100
+    # Generate Button
+    generate_btn = st.button("✨ Generate Premium QR")
+    
+    st.markdown('</div>', unsafe_allow_html=True)
 
-    if c3.button("₹150"):
-        st.session_state.amount = 150
+# --- QR GENERATION LOGIC ---
+if generate_btn:
+    if not final_upi:
+        st.error("Please enter a valid UPI ID")
+    else:
+        # Create UPI URL
+        # upi://pay?pa=address@upi&pn=Name&am=100&cu=INR
+        upi_url = f"upi://pay?pa={final_upi}&pn=UPI%20Payment&am={amount}&cu=INR"
+        
+        # QR Generation
+        qr = qrcode.QRCode(
+            version=1,
+            error_correction=qrcode.constants.ERROR_CORRECT_H,
+            box_size=10,
+            border=2,
+        )
+        qr.add_data(upi_url)
+        qr.make(fit=True)
+        
+        img_qr = qr.make_image(fill_color="#000000", back_color="#ffffff").convert('RGB')
+        
+        # Save to buffer for Streamlit
+        buf = io.BytesIO()
+        img_qr.save(buf, format="PNG")
+        byte_im = buf.getvalue()
 
-    if c4.button("₹200"):
-        st.session_state.amount = 200
-
-    amount = st.number_input(
-        "Enter Amount (₹)",
-        min_value=1,
-        step=1,
-        key="amount"
-    )
-
-    merchant_name = st.text_input(
-        "Merchant Name",
-        value="Payment"
-    )
-
-    if st.button("🚀 Generate Premium QR"):
-
-        with st.spinner("Creating Premium QR..."):
-
-            time.sleep(1)
-
-            upi_url = f"upi://pay?pa={selected_upi}&pn={merchant_name}&am={amount}&cu=INR"
-
-            qr_img = generate_qr(upi_url)
-
-            final_img = create_premium_qr(
-                qr_img,
-                amount,
-                merchant_name,
-                selected_upi
+        # Display Card
+        st.markdown("""
+            <div style="display: flex; justify-content: center;">
+                <div class="qr-display-container" style="width: 350px; border: 2px solid #8E54E9;">
+                    <p style="font-weight: 600; margin-bottom: 15px; color: #333;">Scan and Pay using any UPI App</p>
+        """, unsafe_allow_html=True)
+        
+        st.image(byte_im, width=280)
+        
+        st.markdown(f"""
+                    <div style="margin-top: 15px;">
+                        <h2 style="color: #1a1a1a; margin: 0; font-size: 1.8rem;">₹{amount:,.2f}</h2>
+                        <div class="upi-badge">{final_upi}</div>
+                    </div>
+                    <div style="display: flex; justify-content: space-around; align-items: center; margin-top: 25px; padding-top: 15px; border-top: 1px solid #eee;">
+                        <img src="https://img.icons8.com/color/48/000000/google-pay-india.png" width="30"/>
+                        <img src="https://img.icons8.com/color/48/000000/phonepe.png" width="30"/>
+                        <img src="https://img.icons8.com/color/48/000000/paytm.png" width="30"/>
+                        <img src="https://img.icons8.com/fluency/48/000000/bhim.png" width="30"/>
+                    </div>
+                </div>
+            </div>
+        """, unsafe_allow_html=True)
+        
+        # Action Buttons
+        col_down1, col_down2 = st.columns(2)
+        with col_down1:
+            st.download_button(
+                label="📥 Download QR",
+                data=byte_im,
+                file_name="upi_qr_payment.png",
+                mime="image/png"
             )
+        with col_down2:
+            if st.button("📋 Copy UPI ID"):
+                st.write(f"ID: `{final_upi}` copied to clipboard (Simulated)")
+                st.success("Copied!")
 
-            st.success("✅ Premium QR Generated Successfully!")
-
-            st.image(
-                final_img,
-                use_container_width=True
-            )
-
-            st.markdown(
-                get_download_button(final_img),
-                unsafe_allow_html=True
-            )
-
-    st.markdown("</div>", unsafe_allow_html=True)
-
-# =====================================================
-# FOOTER
-# =====================================================
-
-st.markdown(
-    '<div class="footer">© 2026 Premium UPI QR Generator</div>',
-    unsafe_allow_html=True
-)
+# --- FOOTER ---
+st.markdown("""
+    <div class="footer">
+        <p>🔒 Secure UPI Payments • Verified NPCI Format</p>
+    </div>
+""", unsafe_allow_html=True)
