@@ -101,15 +101,14 @@ def generate_premium_card(upi_id, amount, custom_note):
     qr_w, qr_h = qr_img.size
     bx, by = (w - qr_w) // 2, 310
     
-    # --- MODIFICATION 1: PREMIUM QR SHADOW EFFECT ---
-    # सॉफ्ट और रियलिस्टिक शैडो लेयर बनाने के लिए हम थोड़ा बड़ा डार्क बॉक्स ड्रा करेंगे
+    # --- PREMIUM QR SHADOW EFFECT ---
     shadow_padding = 15
     for offset in range(5, 0, -1):
         draw.rounded_rectangle(
             [bx - shadow_padding + offset, by - shadow_padding + offset, 
              bx + qr_w + shadow_padding + offset, by + qr_h + shadow_padding + offset], 
             radius=18, 
-            fill="#e2e8f0"  # बैकग्राउंड मर्जिंग प्रीमियम सॉफ्ट ग्रे शैडो इफेक्ट
+            fill="#e2e8f0"  
         )
 
     # Modern Rounded Frame Around QR
@@ -117,7 +116,7 @@ def generate_premium_card(upi_id, amount, custom_note):
     draw.rounded_rectangle(
         [bx - frame_padding, by - frame_padding, bx + qr_w + frame_padding, by + qr_h + frame_padding], 
         radius=18, 
-        outline='#ffffff',  # शैडो को निखारने के लिए इनर बॉर्डर वाइट रखा है
+        outline='#ffffff',  
         fill='#ffffff',
         width=3
     )
@@ -129,7 +128,7 @@ def generate_premium_card(upi_id, amount, custom_note):
     # Label
     draw_centered_text(draw, w, content_start_y, "AMOUNT TO PAY", font_label, fill="#64748b")
     
-    # --- MODIFICATION 2: REMOVED ALL SYMBOLS (ONLY AMOUNT) ---
+    # ONLY AMOUNT DISPLAY (NO SYMBOLS)
     amount_str = f"{float(amount):,.2f}"
     draw_centered_text(draw, w, content_start_y + 45, amount_str, font_amount, fill="#0a0e17")
 
@@ -141,7 +140,7 @@ def generate_premium_card(upi_id, amount, custom_note):
     upi_label_str = f"UPI ID: {upi_id}"
     draw_centered_text(draw, w, divider_y + 35, upi_label_str, font_upi, fill="#1e293b")
     
-    # Payment Note Display Area (हमेशा QR के नीचे व्यवस्थित रहेगा)
+    # --- LIVE OPTIONAL PAYMENT NOTE AREA ---
     note_text = custom_note.strip() if custom_note else ""
     note_label_str = f"Note: {note_text}" if note_text else "Note: N/A"
     draw_centered_text(draw, w, divider_y + 85, note_label_str, font_subtitle, fill="#94a3b8")
