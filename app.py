@@ -60,34 +60,34 @@ def generate_premium_card(upi_id, amount, custom_note):
     draw.rectangle([0, header_h-15, w, header_h], fill='#3b82f6') # Light Blue Stripe
     
     # --- INTERNAL ROBUST FONT LOADING SYSTEM ---
-    # इसमें हम सिस्टम के स्टैंडर्ड फोंट्स का उपयोग करेंगे ताकि क्लाउड पर कभी फेल न हो
     try:
-        font_title = ImageFont.truetype("arial.ttf", 46)
+        # SCAN FOR PAYMENT के लिए एक क्लासी/यूनिक Serif फॉन्ट (Georgia)
+        font_title = ImageFont.truetype("georgiab.ttf", 44) 
         font_subtitle = ImageFont.truetype("arial.ttf", 24)
         font_label = ImageFont.truetype("arial.ttf", 22)
-        font_amount = ImageFont.truetype("arial.ttf", 64)  # Massive Size
+        font_amount = ImageFont.truetype("arial.ttf", 52)  # Size slightly reduced for premium look
         font_upi = ImageFont.truetype("arial.ttf", 28)
         font_footer = ImageFont.truetype("arial.ttf", 20)
     except IOError:
         try:
             # Linux/Streamlit Cloud Fallback font
-            font_title = ImageFont.truetype("LiberationSans-Bold.ttf", 46)
+            font_title = ImageFont.truetype("LiberationSerif-Bold.ttf", 44)
             font_subtitle = ImageFont.truetype("LiberationSans-Regular.ttf", 24)
             font_label = ImageFont.truetype("LiberationSans-Regular.ttf", 22)
-            font_amount = ImageFont.truetype("LiberationSans-Bold.ttf", 64)
+            font_amount = ImageFont.truetype("LiberationSans-Bold.ttf", 52)
             font_upi = ImageFont.truetype("LiberationSans-Regular.ttf", 28)
             font_footer = ImageFont.truetype("LiberationSans-Regular.ttf", 20)
         except IOError:
             # Ultimate Fallback using PIL's built-in scalable font system
-            font_title = ImageFont.load_default(size=46)
+            font_title = ImageFont.load_default(size=44)
             font_subtitle = ImageFont.load_default(size=24)
             font_label = ImageFont.load_default(size=22)
-            font_amount = ImageFont.load_default(size=64)
+            font_amount = ImageFont.load_default(size=52)
             font_upi = ImageFont.load_default(size=28)
             font_footer = ImageFont.load_default(size=20)
 
     # 1. Header Texts Drawing
-    draw_centered_text(draw, w, 60, "SCAN FOR PAYMENT", font_title, fill="white")
+    draw_centered_text(draw, w, 65, "SCAN FOR PAYMENT", font_title, fill="white")
     draw_centered_text(draw, w, 130, "━━━━━━━━━━━━━━━━━━━━━━", font_subtitle, fill="#3b82f6")
     draw_centered_text(draw, w, 170, "USING ANY UPI APP", font_subtitle, fill="#bfdbfe")
     
@@ -117,8 +117,8 @@ def generate_premium_card(upi_id, amount, custom_note):
     # Label
     draw_centered_text(draw, w, content_start_y, "AMOUNT TO PAY", font_label, fill="#64748b")
     
-    # Massive Amount Value
-    amount_str = f"INR {float(amount):,.2f}"
+    # Premium Amount Value with Rupees Symbol (₹)
+    amount_str = f"\u20B9 {float(amount):,.2f}"
     draw_centered_text(draw, w, content_start_y + 45, amount_str, font_amount, fill="#0a0e17")
 
     # Divider Elegant Line
@@ -129,10 +129,10 @@ def generate_premium_card(upi_id, amount, custom_note):
     upi_label_str = f"UPI ID: {upi_id}"
     draw_centered_text(draw, w, divider_y + 35, upi_label_str, font_upi, fill="#1e293b")
     
-    # Optional Note Text
-    if custom_note and custom_note.strip() != "":
-        note_label_str = f"Note: {custom_note}"
-        draw_centered_text(draw, w, divider_y + 85, note_label_str, font_subtitle, fill="#94a3b8")
+    # Payment Note Display Area (हमेशा QR के नीचे व्यवस्थित रहेगा)
+    note_text = custom_note.strip() if custom_note else ""
+    note_label_str = f"Note: {note_text}" if note_text else "Note: N/A"
+    draw_centered_text(draw, w, divider_y + 85, note_label_str, font_subtitle, fill="#94a3b8")
 
     # 4. Premium Flat Footer
     draw.rectangle([0, h-80, w, h], fill='#f1f5f9')
