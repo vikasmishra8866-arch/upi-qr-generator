@@ -1,6 +1,6 @@
 import streamlit as st
 import qrcode
-from PIL import Image, ImageDraw, ImageFont
+from PIL import Image, ImageDraw, ImageFont, ImageFilter
 import io
 
 # --- PAGE CONFIG ---
@@ -101,12 +101,24 @@ def generate_premium_card(upi_id, amount, custom_note):
     qr_w, qr_h = qr_img.size
     bx, by = (w - qr_w) // 2, 310
     
+    # --- MODIFICATION 1: PREMIUM QR SHADOW EFFECT ---
+    # सॉफ्ट और रियलिस्टिक शैडो लेयर बनाने के लिए हम थोड़ा बड़ा डार्क बॉक्स ड्रा करेंगे
+    shadow_padding = 15
+    for offset in range(5, 0, -1):
+        draw.rounded_rectangle(
+            [bx - shadow_padding + offset, by - shadow_padding + offset, 
+             bx + qr_w + shadow_padding + offset, by + qr_h + shadow_padding + offset], 
+            radius=18, 
+            fill="#e2e8f0"  # बैकग्राउंड मर्जिंग प्रीमियम सॉफ्ट ग्रे शैडो इफेक्ट
+        )
+
     # Modern Rounded Frame Around QR
     frame_padding = 15
     draw.rounded_rectangle(
         [bx - frame_padding, by - frame_padding, bx + qr_w + frame_padding, by + qr_h + frame_padding], 
         radius=18, 
-        outline='#e2e8f0', 
+        outline='#ffffff',  # शैडो को निखारने के लिए इनर बॉर्डर वाइट रखा है
+        fill='#ffffff',
         width=3
     )
     card.paste(qr_img, (bx, by))
@@ -117,8 +129,8 @@ def generate_premium_card(upi_id, amount, custom_note):
     # Label
     draw_centered_text(draw, w, content_start_y, "AMOUNT TO PAY", font_label, fill="#64748b")
     
-    # Premium Amount Value with Rupees Symbol (₹)
-    amount_str = f"\u20B9 {float(amount):,.2f}"
+    # --- MODIFICATION 2: REMOVED ALL SYMBOLS (ONLY AMOUNT) ---
+    amount_str = f"{float(amount):,.2f}"
     draw_centered_text(draw, w, content_start_y + 45, amount_str, font_amount, fill="#0a0e17")
 
     # Divider Elegant Line
