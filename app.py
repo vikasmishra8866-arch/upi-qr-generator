@@ -2,7 +2,6 @@ import streamlit as st
 import qrcode
 from PIL import Image, ImageDraw, ImageFont
 import io
-import urllib.request
 
 # --- PAGE CONFIG ---
 st.set_page_config(page_title="Premium UPI Card Generator", page_icon="💳", layout="centered")
@@ -42,18 +41,7 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-# --- FUNCTION TO DOWNLOAD PREMIUM FONT ---
-@st.cache_data
-def get_premium_font():
-    try:
-        font_url = "https://github.com/google/fonts/raw/main/ofl/inter/Inter%5Bslnt%2Cwght%5D.ttf"
-        font_path = "Inter-Bold.ttf"
-        urllib.request.urlretrieve(font_url, font_path)
-        return font_path
-    except Exception as e:
-        return None
-
-# Helper function to get centered coordinates for text with custom fonts
+# Helper function to get centered coordinates for text safely
 def draw_centered_text(draw, canvas_w, y, text, font, fill):
     text_bbox = draw.textbbox((0, 0), text, font=font)
     text_w = text_bbox[2] - text_bbox[0]
@@ -61,35 +49,49 @@ def draw_centered_text(draw, canvas_w, y, text, font, fill):
     draw.text((text_x, y), text, font=font, fill=fill)
 
 def generate_premium_card(upi_id, amount, custom_note):
-    # Canvas Layout Definition (600x950 for extra breathing room for large text)
+    # Canvas Layout - Large vertical high-res canvas (600x950)
     w, h = 600, 950
     card = Image.new('RGB', (w, h), '#ffffff')
     draw = ImageDraw.Draw(card)
     
-    # Extra large header area to cover big fonts
+    # Header Area
     header_h = 260
     draw.rectangle([0, 0, w, header_h], fill='#1e3a8a') # Deep Blue
-    draw.rectangle([0, header_h-15, w, header_h], fill='#3b82f6') # Light Blue Accent
+    draw.rectangle([0, header_h-15, w, header_h], fill='#3b82f6') # Light Blue Stripe
     
-    # Loading Fonts with Mega Sizes
-    font_file = get_premium_font()
-    
-    if font_file:
-        font_title = ImageFont.truetype(font_file, 46)       # "SCAN FOR PAYMENT" (Super Big)
-        font_subtitle = ImageFont.truetype(font_file, 26)    # "USING ANY UPI APP" (Clear & Bold)
-        font_label = ImageFont.truetype(font_file, 24)       # "AMOUNT TO PAY" (Highly Readable)
-        font_amount = ImageFont.truetype(font_file, 64)      # "INR 100.00" (Massive & Bold)
-        font_upi = ImageFont.truetype(font_file, 28)         # UPI ID (Clear Text)
-        font_footer = ImageFont.truetype(font_file, 22)      # Secure Gateway Text (Readable)
-    else:
-        font_title = font_subtitle = font_label = font_amount = font_upi = font_footer = ImageFont.load_default()
+    # --- INTERNAL ROBUST FONT LOADING SYSTEM ---
+    # इसमें हम सिस्टम के स्टैंडर्ड फोंट्स का उपयोग करेंगे ताकि क्लाउड पर कभी फेल न हो
+    try:
+        font_title = ImageFont.truetype("arial.ttf", 46)
+        font_subtitle = ImageFont.truetype("arial.ttf", 24)
+        font_label = ImageFont.truetype("arial.ttf", 22)
+        font_amount = ImageFont.truetype("arial.ttf", 64)  # Massive Size
+        font_upi = ImageFont.truetype("arial.ttf", 28)
+        font_footer = ImageFont.truetype("arial.ttf", 20)
+    except IOError:
+        try:
+            # Linux/Streamlit Cloud Fallback font
+            font_title = ImageFont.truetype("LiberationSans-Bold.ttf", 46)
+            font_subtitle = ImageFont.truetype("LiberationSans-Regular.ttf", 24)
+            font_label = ImageFont.truetype("LiberationSans-Regular.ttf", 22)
+            font_amount = ImageFont.truetype("LiberationSans-Bold.ttf", 64)
+            font_upi = ImageFont.truetype("LiberationSans-Regular.ttf", 28)
+            font_footer = ImageFont.truetype("LiberationSans-Regular.ttf", 20)
+        except IOError:
+            # Ultimate Fallback using PIL's built-in scalable font system
+            font_title = ImageFont.load_default(size=46)
+            font_subtitle = ImageFont.load_default(size=24)
+            font_label = ImageFont.load_default(size=22)
+            font_amount = ImageFont.load_default(size=64)
+            font_upi = ImageFont.load_default(size=28)
+            font_footer = ImageFont.load_default(size=20)
 
-    # 1. Drawing Huge Header Texts (Adjusted Y-coordinates to avoid crowding)
-    draw_centered_text(draw, w, 55, "SCAN FOR PAYMENT", font_title, fill="white")
-    draw_centered_text(draw, w, 125, "━━━━━━━━━━━━━━━━━━━━━━", font_subtitle, fill="#3b82f6")
-    draw_centered_text(draw, w, 165, "USING ANY UPI APP", font_subtitle, fill="#bfdbfe")
+    # 1. Header Texts Drawing
+    draw_centered_text(draw, w, 60, "SCAN FOR PAYMENT", font_title, fill="white")
+    draw_centered_text(draw, w, 130, "━━━━━━━━━━━━━━━━━━━━━━", font_subtitle, fill="#3b82f6")
+    draw_centered_text(draw, w, 170, "USING ANY UPI APP", font_subtitle, fill="#bfdbfe")
     
-    # 2. Balanced QR Code Generation (Slightly more compact for text space)
+    # 2. QR Code Generation (Perfect Balanced Square)
     upi_url = f"upi://pay?pa={upi_id}&pn=UPI%20Payment&am={amount}&cu=INR&tn={custom_note}"
     qr = qrcode.QRCode(version=3, box_size=8, border=1) 
     qr.add_data(upi_url)
@@ -97,33 +99,33 @@ def generate_premium_card(upi_id, amount, custom_note):
     qr_img = qr.make_image(fill_color="#0f172a", back_color="white").convert('RGB')
     
     qr_w, qr_h = qr_img.size
-    bx, by = (w - qr_w) // 2, 310 # Pushed slightly down
+    bx, by = (w - qr_w) // 2, 310
     
-    # Dynamic Frame Around QR
-    frame_padding = 12
+    # Modern Rounded Frame Around QR
+    frame_padding = 15
     draw.rounded_rectangle(
         [bx - frame_padding, by - frame_padding, bx + qr_w + frame_padding, by + qr_h + frame_padding], 
-        radius=16, 
+        radius=18, 
         outline='#e2e8f0', 
         width=3
     )
     card.paste(qr_img, (bx, by))
     
-    # 3. Content Layout (Below QR Section) - Huge Sizes
-    content_start_y = by + qr_h + 60
+    # 3. Bottom Details Section
+    content_start_y = by + qr_h + 65
     
-    # Label: "AMOUNT TO PAY"
+    # Label
     draw_centered_text(draw, w, content_start_y, "AMOUNT TO PAY", font_label, fill="#64748b")
     
-    # Massive Amount Display
+    # Massive Amount Value
     amount_str = f"INR {float(amount):,.2f}"
     draw_centered_text(draw, w, content_start_y + 45, amount_str, font_amount, fill="#0a0e17")
 
-    # Clean Divider Line
+    # Divider Elegant Line
     divider_y = content_start_y + 145
     draw.line([(100, divider_y), (500, divider_y)], fill="#e2e8f0", width=3)
     
-    # Big UPI ID Text
+    # UPI ID Text
     upi_label_str = f"UPI ID: {upi_id}"
     draw_centered_text(draw, w, divider_y + 35, upi_label_str, font_upi, fill="#1e293b")
     
@@ -132,7 +134,7 @@ def generate_premium_card(upi_id, amount, custom_note):
         note_label_str = f"Note: {custom_note}"
         draw_centered_text(draw, w, divider_y + 85, note_label_str, font_subtitle, fill="#94a3b8")
 
-    # 4. Clean Flat Big Footer
+    # 4. Premium Flat Footer
     draw.rectangle([0, h-80, w, h], fill='#f1f5f9')
     draw_centered_text(draw, w, h-50, "🔒 SECURE UPI GATEWAY", font_footer, fill="#64748b")
     
