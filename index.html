@@ -1,462 +1,600 @@
 <!DOCTYPE html>
 <html lang="en" class="dark">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Elite UPI QR Card Generator</title>
-    
-    <!-- Tailwind CSS CDN -->
-    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
-    
-    <!-- Google Fonts: Plus Jakarta Sans & JetBrains Mono -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    
-    <!-- FontAwesome & Lucide Icons -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <script src="https://unpkg.com/lucide@latest"></script>
-    
-    <!-- QRCode.js & html2canvas CDN -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Elite UPI QR Card Generator</title>
+  
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+            mono: ['"JetBrains Mono"', 'monospace'],
+          },
+          colors: {
+            obsidian: '#060d0a',
+            emerald: {
+              400: '#34d399',
+              500: '#10b981',
+              600: '#059669',
+              900: '#064e3b',
+              950: '#022c22',
+            },
+            cyan: {
+              300: '#67e8f9',
+              400: '#22d3ee',
+              500: '#06b6d4',
+            }
+          },
+          animation: {
+            'pulse-slow': 'pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+            'glow-spin': 'spin 12s linear infinite',
+          }
+        }
+      }
+    }
+  </script>
 
-    <style>
-        body {
-            font-family: 'Plus Jakarta Sans', sans-serif;
-            background-color: #060d0a;
-            color: #f1f5f9;
-            overflow-x: hidden;
-        }
-        .font-mono {
-            font-family: 'JetBrains Mono', monospace;
-        }
-        /* Custom scrollbar */
-        ::-webkit-scrollbar {
-            width: 8px;
-        }
-        ::-webkit-scrollbar-track {
-            background: #060d0a;
-        }
-        ::-webkit-scrollbar-thumb {
-            background: #10b98133;
-            border-radius: 4px;
-        }
-        ::-webkit-scrollbar-thumb:hover {
-            background: #10b98166;
-        }
-        canvas#bg-canvas {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100vw;
-            height: 100vh;
-            pointer-events: none;
-            z-index: 0;
-        }
-    </style>
+  <!-- Lucide Icons & FontAwesome -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+  <!-- QRCode.js CDN -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+
+  <!-- html2canvas CDN -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
+  <style>
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      background-color: #060d0a;
+      color: #f3f4f6;
+      overflow-x: hidden;
+    }
+
+    /* Custom Scrollbar */
+    ::-webkit-scrollbar {
+      width: 8px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #060d0a;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #064e3b;
+      border-radius: 4px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #10b981;
+    }
+
+    .metallic-glass {
+      background: linear-gradient(135deg, rgba(2, 44, 34, 0.9) 0%, rgba(15, 23, 42, 0.95) 50%, rgba(4, 47, 46, 0.9) 100%);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid rgba(16, 185, 129, 0.35);
+      box-shadow: 0 20px 50px rgba(16, 185, 129, 0.15), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+    }
+
+    .card-preview-container {
+      background: linear-gradient(145deg, #022c22 0%, #0f172a 50%, #042f2e 100%);
+      position: relative;
+    }
+
+    .card-preview-container::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      border-radius: 1.5rem;
+      padding: 2px;
+      background: linear-gradient(135deg, rgba(16,185,129,0.6), rgba(6,182,212,0.2), rgba(245,158,11,0.5));
+      -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+      -webkit-mask-composite: xor;
+      mask-composite: exclude;
+      pointer-events: none;
+    }
+
+    /* Gold Chip Texture */
+    .sim-chip {
+      background: linear-gradient(135deg, #fef08a 0%, #f59e0b 50%, #b45309 100%);
+      box-shadow: inset 0 0 4px rgba(0,0,0,0.4);
+    }
+
+    /* Custom Input Focus */
+    .custom-input {
+      background: rgba(6, 13, 10, 0.8);
+      border: 1px solid rgba(16, 185, 129, 0.3);
+      transition: all 0.3s ease;
+    }
+    .custom-input:focus {
+      outline: none;
+      border-color: #10b981;
+      box-shadow: 0 0 15px rgba(16, 185, 129, 0.3);
+    }
+  </style>
 </head>
-<body class="relative min-h-screen flex flex-col justify-between selection:bg-emerald-500 selection:text-black">
+<body class="min-h-screen flex flex-col justify-between relative selection:bg-emerald-500 selection:text-black">
 
-    <!-- Background Interactive Glow Canvas -->
-    <canvas id="bg-canvas"></canvas>
+  <!-- Interactive Canvas Background -->
+  <canvas id="bg-canvas" class="fixed inset-0 pointer-events-none z-0"></canvas>
 
+  <div class="relative z-10 flex flex-col min-h-screen">
+    
     <!-- HEADER & BRANDING BAR -->
-    <header class="relative z-10 border-b border-emerald-500/20 bg-emerald-950/30 backdrop-blur-xl sticky top-0">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
-            <!-- Left Branding -->
-            <div class="flex items-center space-x-3">
-                <div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-emerald-500/20 to-cyan-500/20 border border-emerald-500/40 flex items-center justify-center shadow-[0_0_20px_rgba(16,185,129,0.3)]">
-                    <i class="fa-solid fa-bolt text-emerald-400 text-xl animate-pulse"></i>
-                </div>
-                <div>
-                    <h1 class="text-xl sm:text-2xl font-extrabold tracking-tight bg-gradient-to-r from-emerald-400 via-teal-300 to-cyan-400 bg-clip-text text-transparent">
-                        ELITE UPI QR DESK
-                    </h1>
-                    <p class="text-xs text-emerald-400/70 font-medium tracking-wide">SECURE MERCHANT GATEWAY</p>
-                </div>
-            </div>
-
-            <!-- Right Badge & Clock -->
-            <div class="flex items-center space-x-4">
-                <div class="hidden md:flex flex-col text-right">
-                    <span id="live-time" class="font-mono text-sm font-semibold text-cyan-300">--:--:-- --</span>
-                    <span id="live-date" class="text-xs text-emerald-400/70 font-medium">---, -- --- ----</span>
-                </div>
-                <div class="px-4 py-2 rounded-full bg-slate-900/80 border border-emerald-500/30 backdrop-blur-md shadow-inner flex items-center space-x-2">
-                    <span class="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
-                    <span class="text-xs font-semibold text-emerald-300 tracking-wider">Managed by Vikas Mishra</span>
-                </div>
-            </div>
+    <header class="w-full border-b border-emerald-500/20 bg-obsidian/80 backdrop-blur-xl sticky top-0 z-50">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
+        
+        <!-- Left Branding -->
+        <div class="flex items-center space-x-3 sm:space-x-4">
+          <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-2xl bg-gradient-to-br from-emerald-500/20 to-teal-500/10 border border-emerald-500/40 flex items-center justify-center shadow-[0_0_20px_rgba(16,185,129,0.3)]">
+            <i data-lucide="zap" class="w-5 h-5 sm:w-6 sm:h-6 text-emerald-400 fill-emerald-400/20"></i>
+          </div>
+          <div>
+            <h1 class="text-lg sm:text-2xl font-extrabold tracking-tight bg-gradient-to-r from-emerald-400 via-teal-300 to-cyan-400 bg-clip-text text-transparent">
+              ELITE UPI QR DESK
+            </h1>
+            <p class="text-[10px] sm:text-xs text-slate-400 font-medium">Enterprise Payment Generator</p>
+          </div>
         </div>
+
+        <!-- Right Badge & Clock -->
+        <div class="flex items-center space-x-3 sm:space-x-6">
+          <div class="hidden md:flex flex-col items-end font-mono">
+            <span id="digital-clock" class="text-sm font-bold text-emerald-400 tracking-wider">00:00:00 AM</span>
+            <span id="digital-date" class="text-[10px] text-slate-400">00 MMM 2026</span>
+          </div>
+          
+          <div class="px-3 py-1.5 sm:px-4 sm:py-2 rounded-full bg-emerald-950/60 border border-emerald-500/30 flex items-center space-x-2 shadow-inner">
+            <span class="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
+            <span class="text-xs font-semibold text-emerald-300 tracking-wide">Managed by Vikas Mishra</span>
+          </div>
+        </div>
+
+      </div>
     </header>
 
-    <!-- MAIN DUAL-PANEL CONTAINER -->
-    <main class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full grid grid-cols-1 lg:grid-cols-12 gap-8 my-auto">
+    <!-- MAIN CONTENT CONTAINER -->
+    <main class="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
         
-        <!-- LEFT PANEL: INPUT CONTROLS FORM (5 Cols) -->
-        <div class="lg:col-span-5 bg-gradient-to-br from-emerald-950/60 via-slate-900/80 to-teal-950/60 border border-emerald-500/30 rounded-3xl p-6 sm:p-8 backdrop-blur-2xl shadow-[0_20px_50px_rgba(0,0,0,0.5)] flex flex-col justify-between">
-            <div class="space-y-6">
-                <div class="flex items-center justify-between border-b border-emerald-500/20 pb-4">
-                    <h2 class="text-lg font-bold text-emerald-300 flex items-center gap-2">
-                        <i class="fa-solid fa-sliders text-emerald-400"></i> Configuration Panel
-                    </h2>
-                    <button id="reset-btn" class="text-xs text-cyan-400 hover:text-cyan-300 transition flex items-center gap-1 cursor-pointer">
-                        <i class="fa-solid fa-rotate-right"></i> Reset Defaults
-                    </button>
-                </div>
+        <!-- LEFT PANEL: INPUT CONTROLS FORM -->
+        <section class="lg:col-span-5 metallic-glass p-6 sm:p-8 rounded-3xl relative overflow-hidden">
+          <div class="flex items-center justify-between pb-6 border-b border-emerald-500/20 mb-6">
+            <div class="flex items-center space-x-3">
+              <i data-lucide="sliders" class="w-5 h-5 text-emerald-400"></i>
+              <h2 class="text-lg font-bold text-white tracking-wide">Configuration Panel</h2>
+            </div>
+            <span class="text-xs text-emerald-400/80 font-mono">v3.4 Metallic</span>
+          </div>
 
-                <!-- 1. Preset UPI ID Dropdown Selector -->
-                <div class="space-y-2">
-                    <label class="text-xs font-bold text-emerald-400 uppercase tracking-wider">Select UPI ID / VPA</label>
-                    <div class="relative">
-                        <select id="upi-preset-select" class="w-full bg-slate-950/80 border border-emerald-500/40 rounded-xl px-4 py-3 text-sm text-slate-200 font-mono focus:outline-none focus:border-emerald-400 focus:ring-2 focus:ring-emerald-500/20 appearance-none cursor-pointer">
-                            <option value="9696159863-2@ibl">9696159863-2@ibl</option>
-                            <option value="9696159863@ibl">9696159863@ibl</option>
-                            <option value="9696159863-3@ybl">9696159863-3@ybl</option>
-                            <option value="9696159863.wallet@phonepe">9696159863.wallet@phonepe</option>
-                            <option value="custom">Custom UPI ID...</option>
-                        </select>
-                        <div class="absolute inset-y-0 right-0 flex items-center px-4 pointer-events-none text-emerald-400">
-                            <i class="fa-solid fa-chevron-down text-xs"></i>
-                        </div>
-                    </div>
-                </div>
+          <form id="qr-form" onsubmit="event.preventDefault();" class="space-y-6">
+            
+            <!-- 1. Preset UPI Selector -->
+            <div>
+              <label class="block text-xs font-semibold uppercase tracking-wider text-slate-300 mb-2">
+                Select VPA / UPI ID
+              </label>
+              <div class="relative">
+                <select id="preset-upi-select" class="w-full custom-input text-slate-200 text-sm rounded-xl px-4 py-3 appearance-none cursor-pointer font-mono focus:ring-0">
+                  <option value="9696159863-2@ibl">9696159863-2@ibl (Primary PhonePe)</option>
+                  <option value="9696159863@ibl">9696159863@ibl (PhonePe Secondary)</option>
+                  <option value="9696159863-3@ybl">9696159863-3@ybl (YES Bank VPA)</option>
+                  <option value="9696159863.wallet@phonepe">9696159863.wallet@phonepe (Wallet)</option>
+                  <option value="CUSTOM">Custom UPI ID...</option>
+                </select>
+                <i data-lucide="chevron-down" class="w-4 h-4 text-emerald-400 absolute right-4 top-3.5 pointer-events-none"></i>
+              </div>
+            </div>
 
-                <!-- 2. Custom UPI ID Input Box (Hidden by default unless custom is selected) -->
-                <div id="custom-upi-container" class="space-y-2 hidden">
-                    <label class="text-xs font-bold text-cyan-400 uppercase tracking-wider">Enter Custom UPI ID</label>
-                    <div class="relative">
-                        <input type="text" id="custom-upi-input" placeholder="e.g. username@okhdfcbank" class="w-full bg-slate-950/80 border border-cyan-500/40 rounded-xl px-4 py-3 text-sm text-slate-200 font-mono focus:outline-none focus:border-cyan-400 focus:ring-2 focus:ring-cyan-500/20">
-                    </div>
-                </div>
+            <!-- 2. Custom UPI ID Field (Hidden by Default) -->
+            <div id="custom-upi-container" class="hidden transition-all duration-300">
+              <label class="block text-xs font-semibold uppercase tracking-wider text-cyan-400 mb-2">
+                Enter Custom UPI ID
+              </label>
+              <div class="relative">
+                <input type="text" id="custom-upi-input" placeholder="example@upi" class="w-full custom-input text-cyan-300 text-sm rounded-xl px-4 py-3 font-mono placeholder-slate-600">
+                <i data-lucide="at-sign" class="w-4 h-4 text-cyan-400 absolute right-4 top-3.5"></i>
+              </div>
+            </div>
 
-                <!-- 3. Amount Input & Quick Preset Buttons -->
-                <div class="space-y-2">
-                    <label class="text-xs font-bold text-emerald-400 uppercase tracking-wider">Payment Amount (INR)</label>
-                    <div class="relative">
-                        <span class="absolute inset-y-0 left-0 pl-4 flex items-center text-emerald-400 font-mono font-bold">₹</span>
-                        <input type="number" id="amount-input" placeholder="Optional (Leave blank for open amount)" class="w-full bg-slate-950/80 border border-emerald-500/40 rounded-xl pl-8 pr-4 py-3 text-sm text-slate-200 font-mono focus:outline-none focus:border-emerald-400 focus:ring-2 focus:ring-emerald-500/20">
-                    </div>
-                    <!-- Quick Amount Pills -->
-                    <div class="flex flex-wrap gap-2 pt-1">
-                        <button type="button" class="quick-amt px-3 py-1 rounded-lg bg-slate-900 border border-emerald-500/30 text-xs font-mono text-emerald-300 hover:bg-emerald-500/20 transition cursor-pointer" data-val="100">₹100</button>
-                        <button type="button" class="quick-amt px-3 py-1 rounded-lg bg-slate-900 border border-emerald-500/30 text-xs font-mono text-emerald-300 hover:bg-emerald-500/20 transition cursor-pointer" data-val="500">₹500</button>
-                        <button type="button" class="quick-amt px-3 py-1 rounded-lg bg-slate-900 border border-emerald-500/30 text-xs font-mono text-emerald-300 hover:bg-emerald-500/20 transition cursor-pointer" data-val="1000">₹1000</button>
-                        <button type="button" class="quick-amt px-3 py-1 rounded-lg bg-slate-900 border border-emerald-500/30 text-xs font-mono text-emerald-300 hover:bg-emerald-500/20 transition cursor-pointer" data-val="2000">₹2000</button>
-                        <button type="button" id="clear-amt" class="px-3 py-1 rounded-lg bg-rose-950/50 border border-rose-500/30 text-xs font-mono text-rose-300 hover:bg-rose-900/50 transition cursor-pointer">Clear</button>
-                    </div>
-                </div>
+            <!-- 3. Amount & Quick Pills -->
+            <div>
+              <label class="block text-xs font-semibold uppercase tracking-wider text-slate-300 mb-2">
+                Payment Amount (₹) <span class="text-slate-500 font-normal lowercase">(optional)</span>
+              </label>
+              <div class="relative mb-3">
+                <span class="absolute left-4 top-3 text-slate-400 font-bold">₹</span>
+                <input type="number" id="amount-input" step="any" min="0" placeholder="0.00" class="w-full custom-input text-emerald-400 text-base font-extrabold rounded-xl pl-8 pr-4 py-3 font-mono">
+              </div>
 
-                <!-- 4. Payment Note / Remark Input Box -->
-                <div class="space-y-2">
-                    <label class="text-xs font-bold text-emerald-400 uppercase tracking-wider">Payment Note / Remark</label>
-                    <input type="text" id="note-input" value="Elite Vehicle Service Fee" placeholder="e.g. RC Verification Charge" class="w-full bg-slate-950/80 border border-emerald-500/40 rounded-xl px-4 py-3 text-sm text-slate-200 font-mono focus:outline-none focus:border-emerald-400 focus:ring-2 focus:ring-emerald-500/20">
-                </div>
+              <!-- Quick Pills -->
+              <div class="grid grid-cols-5 gap-2">
+                <button type="button" onclick="setAmount(100)" class="py-1.5 rounded-lg bg-emerald-950/80 border border-emerald-500/30 text-xs font-mono font-bold text-emerald-300 hover:bg-emerald-500 hover:text-black transition-all">₹100</button>
+                <button type="button" onclick="setAmount(500)" class="py-1.5 rounded-lg bg-emerald-950/80 border border-emerald-500/30 text-xs font-mono font-bold text-emerald-300 hover:bg-emerald-500 hover:text-black transition-all">₹500</button>
+                <button type="button" onclick="setAmount(1000)" class="py-1.5 rounded-lg bg-emerald-950/80 border border-emerald-500/30 text-xs font-mono font-bold text-emerald-300 hover:bg-emerald-500 hover:text-black transition-all">₹1000</button>
+                <button type="button" onclick="setAmount(2000)" class="py-1.5 rounded-lg bg-emerald-950/80 border border-emerald-500/30 text-xs font-mono font-bold text-emerald-300 hover:bg-emerald-500 hover:text-black transition-all">₹2000</button>
+                <button type="button" onclick="setAmount('')" class="py-1.5 rounded-lg bg-slate-900 border border-slate-700 text-xs font-mono font-bold text-slate-400 hover:bg-red-500/20 hover:text-red-400 hover:border-red-500/40 transition-all">Clear</button>
+              </div>
+            </div>
+
+            <!-- 4. Payment Note -->
+            <div>
+              <label class="block text-xs font-semibold uppercase tracking-wider text-slate-300 mb-2">
+                Payment Remark / Note
+              </label>
+              <div class="relative">
+                <input type="text" id="note-input" placeholder="e.g., Vehicle Service Fee" class="w-full custom-input text-slate-200 text-sm rounded-xl px-4 py-3">
+                <i data-lucide="file-text" class="w-4 h-4 text-slate-500 absolute right-4 top-3.5"></i>
+              </div>
             </div>
 
             <!-- 5. Action Buttons -->
-            <div class="space-y-3 pt-6 border-t border-emerald-500/20 mt-6">
-                <button id="generate-btn" class="w-full py-4 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-slate-950 font-extrabold text-sm tracking-wider uppercase shadow-[0_0_30px_rgba(16,185,129,0.4)] transition transform active:scale-98 flex items-center justify-center gap-2 cursor-pointer">
-                    <i class="fa-solid fa-bolt-lightning"></i> Generate UPI QR Card
-                </button>
-                <button id="download-btn" class="w-full py-4 rounded-xl bg-slate-900 hover:bg-slate-800 border border-cyan-500/40 text-cyan-300 font-bold text-sm tracking-wider uppercase shadow-lg transition flex items-center justify-center gap-2 cursor-pointer">
-                    <i class="fa-solid fa-download"></i> Download UPI Card (PNG)
-                </button>
+            <div class="pt-4 space-y-3">
+              <button type="button" onclick="generateQRCard()" class="w-full py-4 rounded-xl bg-gradient-to-r from-emerald-500 via-teal-500 to-cyan-500 text-black font-extrabold tracking-wider uppercase text-sm shadow-[0_0_25px_rgba(16,185,129,0.4)] hover:shadow-[0_0_35px_rgba(16,185,129,0.6)] hover:scale-[1.01] transition-all flex items-center justify-center space-x-2">
+                <i data-lucide="zap" class="w-4 h-4 fill-black"></i>
+                <span>Generate UPI QR Card</span>
+              </button>
+
+              <button type="button" onclick="downloadPNG()" class="w-full py-3.5 rounded-xl bg-slate-900 border border-cyan-500/40 text-cyan-300 font-bold text-sm tracking-wide hover:bg-cyan-950/40 hover:border-cyan-400 transition-all flex items-center justify-center space-x-2">
+                <i data-lucide="download" class="w-4 h-4 text-cyan-400"></i>
+                <span>Download Card (PNG High-Res)</span>
+              </button>
             </div>
-        </div>
 
-        <!-- RIGHT PANEL: LIVE HIGH-GLOSS DEEP EMERALD METALLIC CARD PREVIEW (7 Cols) -->
-        <div class="lg:col-span-7 flex items-center justify-center p-2 sm:p-6">
-            <div class="w-full max-w-md">
-                
-                <!-- PRINTABLE & DOWNLOADABLE UPI CARD CONTAINER -->
-                <div id="printable-upi-card" class="relative bg-gradient-to-br from-emerald-950/95 via-slate-900/98 to-teal-950/95 border-2 border-emerald-500/50 shadow-[0_25px_60px_rgba(16,185,129,0.25)] rounded-3xl p-6 sm:p-8 backdrop-blur-2xl overflow-hidden">
-                    
-                    <!-- Decorative background grid patterns inside card -->
-                    <div class="absolute -right-12 -top-12 w-48 h-48 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none"></div>
-                    <div class="absolute -left-12 -bottom-12 w-48 h-48 bg-cyan-500/10 rounded-full blur-3xl pointer-events-none"></div>
+          </form>
+        </section>
 
-                    <!-- Top Header Bar on Card -->
-                    <div class="flex items-center justify-between mb-6 relative z-10">
-                        <div class="flex items-center space-x-3">
-                            <div class="w-12 h-9 rounded-lg bg-gradient-to-tr from-amber-500 via-yellow-400 to-amber-600 p-0.5 shadow-md flex items-center justify-center">
-                                <div class="w-full h-full bg-slate-950/80 rounded-[6px] flex items-center justify-center">
-                                    <div class="grid grid-cols-3 gap-0.5 opacity-80">
-                                        <div class="w-1 h-1 bg-amber-400 rounded-full"></div>
-                                        <div class="w-1 h-1 bg-amber-400 rounded-full"></div>
-                                        <div class="w-1 h-1 bg-amber-400 rounded-full"></div>
-                                        <div class="w-1 h-1 bg-amber-400 rounded-full"></div>
-                                        <div class="w-1 h-1 bg-amber-400 rounded-full"></div>
-                                        <div class="w-1 h-1 bg-amber-400 rounded-full"></div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div>
-                                <span class="text-xs tracking-widest text-amber-400 font-extrabold block">ELITE PAY</span>
-                                <span class="text-[10px] text-emerald-400/80 uppercase">Verified Merchant</span>
-                            </div>
-                        </div>
+        <!-- RIGHT PANEL: LIVE HIGH-GLOSS DEEP EMERALD METALLIC CARD PREVIEW -->
+        <section class="lg:col-span-7 flex flex-col items-center justify-center">
+          
+          <div class="w-full max-w-md mx-auto">
+            <!-- Card Label Top -->
+            <div class="flex items-center justify-between mb-4 px-2">
+              <span class="text-xs font-mono text-emerald-400 uppercase tracking-widest flex items-center space-x-2">
+                <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                <span>Live Card Rendering</span>
+              </span>
+              <span class="text-xs text-slate-500 font-mono">24-Bit Metallic Finish</span>
+            </div>
 
-                        <!-- Verified Security Seal Badge -->
-                        <div class="px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/30 flex items-center space-x-1.5 shadow-sm">
-                            <i class="fa-solid fa-shield-halved text-emerald-400 text-xs"></i>
-                            <span class="text-[11px] font-bold text-emerald-300 tracking-wide">100% SECURE UPI</span>
-                        </div>
-                    </div>
+            <!-- THE PRINTABLE / DOWNLOADABLE CARD ELEMENT -->
+            <div id="printable-upi-card" class="card-preview-container rounded-3xl p-6 sm:p-8 shadow-[0_25px_60px_rgba(0,0,0,0.8)] relative overflow-hidden text-white space-y-6">
+              
+              <!-- Subtle Card Watermark Grid -->
+              <div class="absolute inset-0 bg-[linear-gradient(to_right,#0f172a_1px,transparent_1px),linear-gradient(to_bottom,#0f172a_1px,transparent_1px)] bg-[size:2rem_2rem] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_50%,#000_70%,transparent_100%)] opacity-20 pointer-events-none"></div>
 
-                    <!-- Payee Name & Selected UPI ID Badge -->
-                    <div class="text-center mb-6 relative z-10 space-y-2">
-                        <h3 class="text-xl sm:text-2xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-white via-slate-100 to-emerald-200 tracking-tight">
-                            Vikas Mishra
-                        </h3>
-                        <div>
-                            <div id="card-upi-display" class="inline-block font-mono text-xs sm:text-sm text-cyan-300 font-bold bg-slate-950/80 border border-cyan-500/40 px-4 py-1.5 rounded-xl shadow-inner">
-                                9696159863-2@ibl
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Centerpiece QR Code Frame -->
-                    <div class="relative z-10 flex flex-col items-center justify-center mb-6">
-                        <div class="p-4 bg-white rounded-2xl shadow-[0_10px_30px_rgba(0,0,0,0.5)] border-4 border-emerald-500/30 relative group">
-                            <!-- QR Code target container -->
-                            <div id="qrcode-container" class="flex items-center justify-center"></div>
-                            
-                            <!-- Center Watermark Logo in QR -->
-                            <div class="absolute inset-0 m-auto w-10 h-10 bg-slate-950 border-2 border-emerald-500 rounded-xl flex items-center justify-center shadow-lg">
-                                <i class="fa-solid fa-bolt text-emerald-400 text-sm"></i>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Card Footer Details: Amount & Note -->
-                    <div class="relative z-10 bg-slate-950/60 border border-emerald-500/20 rounded-2xl p-4 space-y-2">
-                        <div class="flex items-center justify-between">
-                            <span class="text-xs text-emerald-400/70 uppercase tracking-wider font-semibold">Amount</span>
-                            <span id="card-amount-display" class="font-mono text-base font-bold text-amber-400">Open Amount</span>
-                        </div>
-                        <div class="flex items-center justify-between border-t border-emerald-500/10 pt-2">
-                            <span class="text-xs text-emerald-400/70 uppercase tracking-wider font-semibold">Remark</span>
-                            <span id="card-note-display" class="font-mono text-xs text-slate-300 truncate max-w-[200px]" title="Elite Vehicle Service Fee">Elite Vehicle Service Fee</span>
-                        </div>
-                    </div>
-
-                    <!-- App Support Badges -->
-                    <div class="mt-6 pt-4 border-t border-emerald-500/20 flex items-center justify-between text-slate-400 text-[11px] font-medium relative z-10">
-                        <span class="flex items-center gap-1.5"><i class="fa-brands fa-google-pay text-base text-white"></i> GPay</span>
-                        <span class="flex items-center gap-1.5"><i class="fa-solid fa-mobile-screen text-purple-400"></i> PhonePe</span>
-                        <span class="flex items-center gap-1.5"><i class="fa-solid fa-wallet text-cyan-400"></i> Paytm</span>
-                        <span class="flex items-center gap-1.5"><i class="fa-solid fa-building-columns text-emerald-400"></i> BHIM</span>
-                    </div>
-
+              <!-- Top Decorative Header Bar -->
+              <div class="flex items-center justify-between relative z-10 border-b border-emerald-500/20 pb-4">
+                <!-- Gold Metallic Chip Graphic -->
+                <div class="flex items-center space-x-3">
+                  <div class="w-11 h-8 sim-chip rounded-md flex flex-col justify-between p-1">
+                    <div class="w-full h-0.5 bg-black/30 rounded-full"></div>
+                    <div class="w-2/3 h-0.5 bg-black/30 rounded-full"></div>
+                    <div class="w-full h-0.5 bg-black/30 rounded-full"></div>
+                  </div>
+                  <span class="font-mono text-xs font-bold tracking-widest text-amber-400/90 uppercase">ELITE PAY</span>
                 </div>
 
-            </div>
-        </div>
+                <!-- Verified Security Badge -->
+                <div class="flex items-center space-x-1.5 px-2.5 py-1 rounded-full bg-emerald-950/80 border border-emerald-500/40 text-[10px] font-mono text-emerald-300">
+                  <i data-lucide="shield-check" class="w-3.5 h-3.5 text-emerald-400"></i>
+                  <span>100% SECURE UPI</span>
+                </div>
+              </div>
 
+              <!-- PROMINENT SELECTED UPI ID BADGE (NO payee name as strictly required) -->
+              <div class="relative z-10">
+                <div class="text-[10px] uppercase font-mono tracking-wider text-slate-400 mb-1 text-center">DIRECT PAYMENT VPA</div>
+                <div class="font-mono text-cyan-300 font-extrabold text-sm sm:text-base bg-slate-950/90 border border-cyan-500/50 px-4 py-2.5 rounded-2xl text-center shadow-[0_0_15px_rgba(6,182,212,0.3)] tracking-wider w-full overflow-hidden text-ellipsis whitespace-nowrap">
+                  <span id="card-upi-id">9696159863-2@ibl</span>
+                </div>
+              </div>
+
+              <!-- Centerpiece QR Code Frame -->
+              <div class="relative z-10 flex justify-center my-2">
+                <div class="p-4 bg-white rounded-2xl border-2 border-emerald-400/50 shadow-[0_0_30px_rgba(16,185,129,0.3)] relative">
+                  <!-- QR Code Canvas Target -->
+                  <div id="qrcode" class="flex justify-center items-center"></div>
+                  <!-- Center Hologram Icon Overlay -->
+                  <div class="absolute inset-0 flex items-center justify-center pointer-events-none">
+                    <div class="w-9 h-9 bg-slate-950/90 rounded-full border border-emerald-400 flex items-center justify-center shadow-lg">
+                      <i data-lucide="qr-code" class="w-4 h-4 text-emerald-400"></i>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Card Details Block (Amount & Note) -->
+              <div class="relative z-10 bg-slate-950/70 border border-emerald-500/20 rounded-2xl p-3.5 space-y-2 text-center">
+                <div class="flex justify-between items-center text-xs border-b border-slate-800 pb-2">
+                  <span class="text-slate-400 uppercase font-mono text-[10px]">PAYMENT AMOUNT</span>
+                  <span id="card-amount-display" class="font-mono font-extrabold text-emerald-400 text-sm">ANY AMOUNT</span>
+                </div>
+                <div class="flex justify-between items-center text-xs">
+                  <span class="text-slate-400 uppercase font-mono text-[10px]">REMARK / NOTE</span>
+                  <span id="card-note-display" class="font-mono text-slate-300 text-xs truncate max-w-[200px]">General Payment</span>
+                </div>
+              </div>
+
+              <!-- ORIGINAL BRAND LOGOS BAR (ENHANCED LARGE HIGH-VISIBILITY LOGOS) -->
+              <div class="relative z-10 border-t border-emerald-500/20 pt-4">
+                <div class="text-[9px] font-mono text-center text-slate-400 tracking-widest uppercase mb-2.5">ACCEPTED VIA ALL UPI APPS</div>
+                <div class="grid grid-cols-4 gap-2 items-center justify-items-center">
+                  
+                  <!-- Google Pay Logo Container -->
+                  <div class="w-full h-9 bg-white/95 rounded-xl flex items-center justify-center p-1.5 shadow-md border border-white/20 hover:scale-105 transition-transform">
+                    <svg class="h-6 w-auto" viewBox="0 0 512 512" fill="none">
+                      <path d="M473.16 221.48H256v72.53h124.43c-5.38 29.02-21.84 53.6-46.43 70.11v58.26h75.2c44-40.52 69.39-100.2 69.39-170.82 0-10.22-.92-20.1-2.43-30.08z" fill="#4285F4"/>
+                      <path d="M256 442.8c62.62 0 115.17-20.76 153.56-56.42l-75.2-58.26c-20.76 13.91-47.3 22.14-78.36 22.14-60.33 0-111.45-40.76-129.7-95.68H48.86v59.95C87.25 391.13 165.7 442.8 256 442.8z" fill="#34A853"/>
+                      <path d="M126.3 254.58c-4.66-13.91-7.33-28.78-7.33-44.11 0-15.33 2.67-30.2 7.33-44.11V106.41H48.86C32.96 138.16 24 173.86 24 210.47s8.96 72.31 24.86 104.06l77.44-59.95z" fill="#FBBC05"/>
+                      <path d="M256 94.27c34.05 0 64.63 11.72 88.7 34.69l66.52-66.52C371.05 24.88 318.5 0 256 0 165.7 0 87.25 51.67 48.86 128.21l77.44 59.95c18.25-54.92 69.37-93.89 129.7-93.89z" fill="#EA4335"/>
+                    </svg>
+                  </div>
+
+                  <!-- PhonePe Logo Container -->
+                  <div class="w-full h-9 bg-white/95 rounded-xl flex items-center justify-center p-1 shadow-md border border-white/20 hover:scale-105 transition-transform">
+                    <svg class="h-6 w-auto" viewBox="0 0 300 300" fill="none">
+                      <circle cx="150" cy="150" r="140" fill="#5f259f"/>
+                      <path d="M185 85h-35c-5 0-10 4-10 10v110c0 5 4 10 10 10h15c5 0 10-4 10-10v-35h10c30 0 50-20 50-42.5S215 85 185 85zm-5 50h-15v-25h15c10 0 20 5 20 12.5S190 135 180 135z" fill="#fff"/>
+                      <path d="M110 125l-25 45h20l15-27 15 27h20l-25-45z" fill="#10b981"/>
+                    </svg>
+                  </div>
+
+                  <!-- Paytm Logo Container -->
+                  <div class="w-full h-9 bg-white/95 rounded-xl flex items-center justify-center p-1.5 shadow-md border border-white/20 hover:scale-105 transition-transform">
+                    <svg class="h-5 w-auto" viewBox="0 0 180 50" fill="none">
+                      <path d="M15 10h12c7 0 11 3 11 9 0 7-5 10-11 10H21v11H15V10zm12 13c3 0 5-1 5-4s-2-4-5-4h-6v8h6z" fill="#002e6e"/>
+                      <path d="M43 20h6v4h-6v16h-6V20h-4v-4h4v-5h6v5z" fill="#002e6e"/>
+                      <path d="M68 20l-9 20h-6l3-7-7-13h6l4 9 4-9h5z" fill="#00baf2"/>
+                      <path d="M72 10h6v30h-6V10z" fill="#002e6e"/>
+                      <path d="M82 20h6v4h-6v16h-6V20h-4v-4h4v-5h6v5z" fill="#002e6e"/>
+                      <path d="M112 20v20h-6V29c0-4-2-6-5-6-4 0-6 3-6 7v10h-6V20h6v3c2-2 5-4 9-4 5 0 8 3 8 11z" fill="#00baf2"/>
+                    </svg>
+                  </div>
+
+                  <!-- BHIM UPI Logo Container -->
+                  <div class="w-full h-9 bg-white/95 rounded-xl flex items-center justify-center p-1 shadow-md border border-white/20 hover:scale-105 transition-transform">
+                    <svg class="h-6 w-auto" viewBox="0 0 200 60" fill="none">
+                      <path d="M20 10l20 20-20 20H5L25 30 5 10h15z" fill="#06a759"/>
+                      <path d="M35 10l20 20-20 20H20l20-20L20 10h15z" fill="#00519e"/>
+                      <text x="65" y="38" font-family="sans-serif" font-weight="900" font-size="26" fill="#002e6e">UPI</text>
+                    </svg>
+                  </div>
+
+                </div>
+              </div>
+
+            </div>
+            
+          </div>
+
+        </section>
+
+      </div>
     </main>
 
     <!-- FLOATING WHATSAPP SUPPORT BUTTON -->
-    <a href="https://wa.me/9696159863?text=Hello%20Vikas,%20I%20need%20support%20regarding%20UPI%20QR%20Generator" target="_blank" class="fixed bottom-6 right-6 z-50 w-14 h-14 rounded-full bg-emerald-500 hover:bg-emerald-400 text-slate-950 flex items-center justify-center shadow-[0_10px_30px_rgba(16,185,129,0.5)] transition transform hover:scale-110 cursor-pointer" title="Contact Support via WhatsApp">
-        <i class="fa-brands fa-whatsapp text-2xl font-bold"></i>
+    <a href="https://wa.me/9696159863?text=Hello%20Vikas,%20I%20need%20support%20regarding%20UPI%20QR%20Generator" 
+       target="_blank" 
+       rel="noopener noreferrer"
+       class="fixed bottom-6 right-6 z-50 group flex items-center space-x-3 bg-emerald-950/90 border border-emerald-400/50 p-3.5 rounded-full shadow-[0_0_30px_rgba(16,185,129,0.4)] backdrop-blur-xl hover:bg-emerald-500 hover:text-black transition-all duration-300">
+      <i class="fa-brands fa-whatsapp text-2xl text-emerald-400 group-hover:text-black transition-colors"></i>
+      <span class="max-w-0 overflow-hidden whitespace-nowrap group-hover:max-w-xs transition-all duration-500 text-xs font-bold tracking-wider pr-1">
+        WhatsApp Support
+      </span>
     </a>
 
     <!-- MODERN GLASSMORPHIC FOOTER -->
-    <footer class="relative z-10 border-t border-emerald-500/20 bg-emerald-950/30 backdrop-blur-xl py-6 mt-12">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row items-center justify-between gap-4 text-center md:text-left">
-            <div class="text-xs text-emerald-400/70 font-medium">
-                © 2026 Elite Vehicle Desk • All Rights Reserved
-            </div>
-            <div class="text-xs text-slate-300 font-semibold">
-                Designed & Developed with ❤️ by Vikas Mishra
-            </div>
-            <div class="flex items-center space-x-2 px-3 py-1 rounded-full bg-emerald-950/60 border border-emerald-500/30 text-xs text-emerald-300">
-                <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
-                <span>All Systems Operational</span>
-            </div>
+    <footer class="w-full border-t border-emerald-500/20 bg-obsidian/90 backdrop-blur-md py-6 z-10">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row items-center justify-between gap-4 text-xs text-slate-400">
+        
+        <div>
+          © 2026 <span class="text-emerald-400 font-bold">Elite Vehicle Desk</span> • All Rights Reserved
         </div>
+
+        <div class="flex items-center space-x-1">
+          <span>Designed & Developed with</span>
+          <i data-lucide="heart" class="w-3.5 h-3.5 text-red-500 fill-red-500 inline"></i>
+          <span>by <strong class="text-slate-200">Vikas Mishra</strong></span>
+        </div>
+
+        <div class="flex items-center space-x-2 font-mono">
+          <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+          <span class="text-emerald-300 font-semibold">🟢 All Systems Operational</span>
+        </div>
+
+      </div>
     </footer>
 
-    <!-- JAVASCRIPT LOGIC -->
-    <script>
-        // --- 1. BACKGROUND GLOW NODES CANVAS ---
-        const canvas = document.getElementById('bg-canvas');
-        const ctx = canvas.getContext('2d');
-        let width, height;
-        let particles = [];
+  </div>
 
-        function resizeCanvas() {
-            width = canvas.width = window.innerWidth;
-            height = canvas.height = window.innerHeight;
+  <!-- JAVASCRIPT LOGIC -->
+  <script>
+    let qrcodeInstance = null;
+
+    // Initialize Page
+    document.addEventListener("DOMContentLoaded", () => {
+      lucide.createIcons();
+      initBackgroundCanvas();
+      startClock();
+
+      // Form Event Listeners
+      const presetSelect = document.getElementById('preset-upi-select');
+      const customContainer = document.getElementById('custom-upi-container');
+      const customInput = document.getElementById('custom-upi-input');
+      const amountInput = document.getElementById('amount-input');
+      const noteInput = document.getElementById('note-input');
+
+      presetSelect.addEventListener('change', (e) => {
+        if (e.target.value === 'CUSTOM') {
+          customContainer.classList.remove('hidden');
+        } else {
+          customContainer.classList.add('hidden');
         }
-        window.addEventListener('resize', resizeCanvas);
-        resizeCanvas();
+        generateQRCard();
+      });
 
-        for (let i = 0; i < 35; i++) {
-            particles.push({
-                x: Math.random() * width,
-                y: Math.random() * height,
-                radius: Math.random() * 2 + 1,
-                vx: (Math.random() - 0.5) * 0.4,
-                vy: (Math.random() - 0.5) * 0.4,
-                color: Math.random() > 0.5 ? '#10b981' : '#06b6d4'
-            });
-        }
+      customInput.addEventListener('input', generateQRCard);
+      amountInput.addEventListener('input', generateQRCard);
+      noteInput.addEventListener('input', generateQRCard);
 
-        function animateCanvas() {
-            ctx.clearRect(0, 0, width, height);
-            particles.forEach(p => {
-                p.x += p.vx;
-                p.y += p.vy;
-                if (p.x < 0 || p.x > width) p.vx *= -1;
-                if (p.y < 0 || p.y > height) p.vy *= -1;
+      // First QR Generation
+      generateQRCard();
+    });
 
-                ctx.beginPath();
-                ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
-                ctx.fillStyle = p.color;
-                ctx.globalAlpha = 0.25;
-                ctx.fill();
-            });
-            requestAnimationFrame(animateCanvas);
-        }
-        animateCanvas();
+    // Real-Time Clock
+    function startClock() {
+      const clockEl = document.getElementById('digital-clock');
+      const dateEl = document.getElementById('digital-date');
 
-        // --- 2. REAL-TIME DIGITAL CLOCK ---
-        function updateClock() {
-            const now = new Date();
-            document.getElementById('live-time').innerText = now.toLocaleTimeString('en-US', { hour12: true });
-            document.getElementById('live-date').innerText = now.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' });
-        }
-        setInterval(updateClock, 1000);
-        updateClock();
+      function update() {
+        const now = new Date();
+        clockEl.textContent = now.toLocaleTimeString('en-US', { hour12: true, hour: '2-digit', minute: '2-digit', second: '2-digit' });
+        dateEl.textContent = now.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
+      }
+      update();
+      setInterval(update, 1000);
+    }
 
-        // --- 3. DYNAMIC UPI QR GENERATOR LOGIC ---
-        const presetSelect = document.getElementById('upi-preset-select');
-        const customContainer = document.getElementById('custom-upi-container');
-        const customInput = document.getElementById('custom-upi-input');
-        const amountInput = document.getElementById('amount-input');
-        const noteInput = document.getElementById('note-input');
-        const generateBtn = document.getElementById('generate-btn');
-        const downloadBtn = document.getElementById('download-btn');
-        const resetBtn = document.getElementById('reset-btn');
+    // Set Quick Preset Amount
+    function setAmount(val) {
+      document.getElementById('amount-input').value = val;
+      generateQRCard();
+    }
 
-        const cardUpiDisplay = document.getElementById('card-upi-display');
-        const cardAmountDisplay = document.getElementById('card-amount-display');
-        const cardNoteDisplay = document.getElementById('card-note-display');
-        const qrcodeContainer = document.getElementById('qrcode-container');
+    // Get Active UPI ID
+    function getSelectedUPI() {
+      const select = document.getElementById('preset-upi-select');
+      if (select.value === 'CUSTOM') {
+        const customVal = document.getElementById('custom-upi-input').value.trim();
+        return customVal || '9696159863-2@ibl';
+      }
+      return select.value;
+    }
 
-        let qrCodeInstance = null;
+    // Generate UPI QR Code & Update Live Card Display
+    function generateQRCard() {
+      const upiId = getSelectedUPI();
+      const amount = document.getElementById('amount-input').value.trim();
+      const note = document.getElementById('note-input').value.trim();
 
-        function getActiveUpiId() {
-            if (presetSelect.value === 'custom') {
-                return customInput.value.trim() || '9696159863-2@ibl';
-            }
-            return presetSelect.value;
-        }
+      // Update Card Labels
+      document.getElementById('card-upi-id').textContent = upiId;
+      
+      const amountDisplay = document.getElementById('card-amount-display');
+      if (amount && !isNaN(amount) && parseFloat(amount) > 0) {
+        amountDisplay.textContent = `₹${parseFloat(amount).toFixed(2)}`;
+      } else {
+        amountDisplay.textContent = 'ANY AMOUNT';
+      }
 
-        function updateQRCode() {
-            const upiId = getActiveUpiId();
-            const amount = amountInput.value.trim();
-            const note = noteInput.value.trim() || 'Elite Vehicle Service Fee';
-            const payeeName = 'Vikas Mishra';
+      const noteDisplay = document.getElementById('card-note-display');
+      noteDisplay.textContent = note ? note : 'General Payment';
 
-            // Update Card visual labels
-            cardUpiDisplay.innerText = upiId;
-            cardNoteDisplay.innerText = note;
-            cardNoteDisplay.title = note;
+      // Build Standard UPI URL Payload
+      // Format: upi://pay?pa=UPI_ID&am=AMOUNT&tn=NOTE&cu=INR
+      let upiPayload = `upi://pay?pa=${encodeURIComponent(upiId)}&cu=INR`;
+      if (amount && !isNaN(amount) && parseFloat(amount) > 0) {
+        upiPayload += `&am=${encodeURIComponent(amount)}`;
+      }
+      if (note) {
+        upiPayload += `&tn=${encodeURIComponent(note)}`;
+      }
 
-            if (amount && !isNaN(amount) && Number(amount) > 0) {
-                cardAmountDisplay.innerText = `₹${Number(amount).toFixed(2)}`;
-            } else {
-                cardAmountDisplay.innerText = 'Open Amount';
-            }
+      // Render Dynamic QR Code using QRCode.js
+      const qrContainer = document.getElementById("qrcode");
+      qrContainer.innerHTML = ""; // Clear existing
 
-            // Construct standard UPI URI
-            // Format: upi://pay?pa=VPA&pn=NAME&am=AMOUNT&tn=NOTE&cu=INR
-            let upiUri = `upi://pay?pa=${encodeURIComponent(upiId)}&pn=${encodeURIComponent(payeeName)}&tn=${encodeURIComponent(note)}&cu=INR`;
-            if (amount && !isNaN(amount) && Number(amount) > 0) {
-                upiUri += `&am=${encodeURIComponent(amount)}`;
-            }
+      qrcodeInstance = new QRCode(qrContainer, {
+        text: upiPayload,
+        width: 170,
+        height: 170,
+        colorDark: "#022c22",
+        colorLight: "#ffffff",
+        correctLevel: QRCode.CorrectLevel.H
+      });
+    }
 
-            // Clear previous QR
-            qrcodeContainer.innerHTML = '';
+    // High-Resolution PNG Capture & Download via html2canvas
+    function downloadPNG() {
+      const cardContainer = document.getElementById('printable-upi-card');
 
-            // Generate new QR code using QRCode.js
-            qrCodeInstance = new QRCode(qrcodeContainer, {
-                text: upiUri,
-                width: 180,
-                height: 180,
-                colorDark: "#060d0a",
-                colorLight: "#ffffff",
-                correctLevel: QRCode.CorrectLevel.H
-            });
-        }
+      // Use html2canvas with requested strict config
+      html2canvas(cardContainer, {
+        scale: 3,
+        useCORS: true,
+        allowTaint: true,
+        backgroundColor: null
+      }).then(canvas => {
+        const link = document.createElement('a');
+        const activeUPI = getSelectedUPI();
+        link.download = `UPI-Card-${activeUPI.replace(/[^a-zA-Z0-0]/g, '_')}.png`;
+        link.href = canvas.toDataURL('image/png', 1.0);
+        link.click();
+      }).catch(err => {
+        console.error("Card generation failed: ", err);
+        alert("Failed to render high-resolution card image. Please try again.");
+      });
+    }
 
-        // Toggle custom input field visibility
-        presetSelect.addEventListener('change', () => {
-            if (presetSelect.value === 'custom') {
-                customContainer.classList.remove('hidden');
-                customInput.focus();
-            } else {
-                customContainer.classList.add('hidden');
-            }
-            updateQRCode();
+    // Floating Metallic Particle Canvas Background
+    function initBackgroundCanvas() {
+      const canvas = document.getElementById('bg-canvas');
+      const ctx = canvas.getContext('2d');
+
+      function resize() {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+      }
+      resize();
+      window.addEventListener('resize', resize);
+
+      const particles = Array.from({ length: 35 }, () => ({
+        x: Math.random() * canvas.width,
+        y: Math.random() * canvas.height,
+        radius: Math.random() * 2 + 1,
+        color: Math.random() > 0.5 ? '#10b981' : '#06b6d4',
+        vx: (Math.random() - 0.5) * 0.4,
+        vy: (Math.random() - 0.5) * 0.4,
+        alpha: Math.random() * 0.5 + 0.2
+      }));
+
+      function animate() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        particles.forEach(p => {
+          p.x += p.vx;
+          p.y += p.vy;
+
+          if (p.x < 0) p.x = canvas.width;
+          if (p.x > canvas.width) p.x = 0;
+          if (p.y < 0) p.y = canvas.height;
+          if (p.y > canvas.height) p.y = 0;
+
+          ctx.beginPath();
+          ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+          ctx.fillStyle = p.color;
+          ctx.globalAlpha = p.alpha;
+          ctx.shadowBlur = 10;
+          ctx.shadowColor = p.color;
+          ctx.fill();
         });
 
-        // Quick Amount Pill handlers
-        document.querySelectorAll('.quick-amt').forEach(btn => {
-            btn.addEventListener('click', () => {
-                amountInput.value = btn.getAttribute('data-val');
-                updateQRCode();
-            });
-        });
+        requestAnimationFrame(animate);
+      }
+      animate();
+    }
+  </script>
 
-        document.getElementById('clear-amt').addEventListener('click', () => {
-            amountInput.value = '';
-            updateQRCode();
-        });
-
-        // Event Listeners for Instant Generation
-        generateBtn.addEventListener('click', updateQRCode);
-        customInput.addEventListener('input', updateQRCode);
-        amountInput.addEventListener('input', updateQRCode);
-        noteInput.addEventListener('input', updateQRCode);
-
-        // Reset Defaults
-        resetBtn.addEventListener('click', () => {
-            presetSelect.value = '9696159863-2@ibl';
-            customContainer.classList.add('hidden');
-            customInput.value = '';
-            amountInput.value = '';
-            noteInput.value = 'Elite Vehicle Service Fee';
-            updateQRCode();
-        });
-
-        // --- 4. HIGH-RES PNG DOWNLOAD VIA HTML2CANVAS ---
-        downloadBtn.addEventListener('click', () => {
-            const cardElement = document.getElementById('printable-upi-card');
-            
-            // Temporary scale up for high resolution
-            html2canvas(cardElement, {
-                scale: 3,
-                useCORS: true,
-                backgroundColor: null
-            }).then(canvas => {
-                const link = document.createElement('a');
-                link.download = `Elite-UPI-QR-${getActiveUpiId()}.png`;
-                link.href = canvas.toDataURL('image/png');
-                link.click();
-            }).catch(err => {
-                console.error('Error generating card image:', err);
-                alert('Could not download card image. Please try again.');
-            });
-        });
-
-        // Initial generation on load
-        window.addEventListener('DOMContentLoaded', () => {
-            updateQRCode();
-        });
-    </script>
 </body>
 </html>
