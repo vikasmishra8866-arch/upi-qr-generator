@@ -90,12 +90,22 @@
     }
 
     /* Ensure QR Code image/canvas renders centered without overflow */
-    #qrcode img, #qrcode canvas {
+    #qrcode canvas, #qrcode img {
       display: block;
       margin: 0 auto;
       border-radius: 12px;
       max-width: 100%;
       height: auto;
+    }
+
+    /* Fix text truncation & explicit alignment for html2canvas capture */
+    .card-text-fix {
+      display: block;
+      width: 100%;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      line-height: 1.4;
     }
   </style>
 </head>
@@ -268,9 +278,9 @@
 
             <!-- 2. PROMINENT SELECTED UPI ID BADGE (MAIN FOCUS) -->
             <div class="w-full my-1">
-              <div class="font-mono text-cyan-300 font-extrabold text-base sm:text-lg bg-slate-950/90 border border-cyan-500/50 px-4 py-2.5 rounded-2xl text-center shadow-[0_0_20px_rgba(6,182,212,0.3)] tracking-wider w-full overflow-hidden text-ellipsis">
+              <div class="font-mono text-cyan-300 font-extrabold text-base sm:text-lg bg-slate-950/90 border border-cyan-500/50 px-4 py-2.5 rounded-2xl text-center shadow-[0_0_20px_rgba(6,182,212,0.3)] tracking-wider w-full overflow-hidden">
                 <div class="text-[9px] font-mono uppercase tracking-widest text-cyan-400/80 mb-0.5">Payment VPA Address</div>
-                <div id="card-upi-display" class="truncate font-bold">
+                <div id="card-upi-display" class="card-text-fix font-bold">
                   9696159863-2@ibl
                 </div>
               </div>
@@ -288,26 +298,17 @@
               <!-- QR Code Container -->
               <div id="qrcode" class="flex items-center justify-center min-w-[210px] min-h-[210px]"></div>
 
-              <!-- High-Gloss Centered Shield & Zap Emblem Overlay -->
-              <div class="absolute inset-0 flex items-center justify-center pointer-events-none">
-                <div class="w-12 h-12 bg-slate-950 border-2 border-emerald-400 rounded-2xl flex items-center justify-center shadow-[0_0_15px_rgba(16,185,129,0.6)] p-1 bg-opacity-95">
-                  <div class="w-full h-full rounded-xl bg-gradient-to-br from-emerald-500/30 to-cyan-500/20 border border-emerald-400/50 flex items-center justify-center">
-                    <i data-lucide="zap" class="w-6 h-6 text-cyan-300 fill-emerald-400/40"></i>
-                  </div>
-                </div>
-              </div>
-
             </div>
 
             <!-- 5. CARD FOOTER DETAILS (Amount & Note) -->
             <div class="w-full bg-slate-950/80 rounded-2xl p-3 border border-emerald-500/30 space-y-1.5">
               <div class="flex items-center justify-between text-xs font-mono">
-                <span class="text-slate-400 font-medium">AMOUNT:</span>
-                <span id="card-amount-display" class="font-extrabold text-emerald-300 text-sm">ANY AMOUNT</span>
+                <span class="text-slate-400 font-medium shrink-0 mr-2">AMOUNT:</span>
+                <span id="card-amount-display" class="font-extrabold text-emerald-300 text-sm card-text-fix text-right">ANY AMOUNT</span>
               </div>
               <div id="card-note-row" class="flex items-center justify-between text-[11px] font-mono border-t border-slate-800/90 pt-1.5 text-slate-300">
                 <span class="text-slate-400 shrink-0 mr-2">REMARK:</span>
-                <span id="card-note-display" class="truncate font-sans font-medium text-slate-200">Instant Payment Transfer</span>
+                <span id="card-note-display" class="font-sans font-medium text-slate-200 card-text-fix text-right">Instant Payment Transfer</span>
               </div>
             </div>
 
@@ -318,35 +319,37 @@
               <div class="grid grid-cols-4 gap-2 bg-slate-950/90 p-2 rounded-2xl border border-emerald-500/25 items-center">
                 
                 <!-- Google Pay Pill -->
-                <div class="bg-white rounded-lg p-1.5 flex items-center justify-center h-8 shadow-sm">
-                  <svg class="h-4 w-auto max-w-full" viewBox="0 0 512 210" xmlns="http://www.w3.org/2000/svg">
-                    <path fill="#4285F4" d="M135.2 92.6c0-6.4-.6-12.5-1.7-18.4H68.8v34.8h37.3c-1.6 8.7-6.5 16-13.8 20.9v17.4h22.3c13.1-12.1 20.6-29.8 20.6-54.7z"/>
-                    <path fill="#34A853" d="M68.8 160c24.7 0 45.4-8.2 60.5-22.3l-22.3-17.4c-8.2 5.5-18.7 8.8-38.2 8.8-23.7 0-43.8-16-51-37.5H15.1v18C30.2 140 47.7 160 68.8 160z"/>
-                    <path fill="#FBBC05" d="M17.8 91.6c-1.8-5.5-2.8-11.3-2.8-17.6s1-12.1 2.8-17.6v-18H15.1C5.5 57.2 0 74.8 0 94s5.5 36.8 15.1 53.6l22.7-18c-3.6-7.1-5.6-15-5.6-23.6z"/>
-                    <path fill="#EA4335" d="M68.8 28c13.4 0 25.5 4.6 35 13.6l26.2-26.2C114.2 2.8 93.5 0 68.8 0 47.7 0 30.2 20 15.1 50l22.7 18c7.2-21.5 27.3-37.5 51-37.5z"/>
-                    <text x="160" y="130" font-family="Plus Jakarta Sans, sans-serif" font-weight="800" font-size="110" fill="#202124">Pay</text>
+                <div class="bg-white rounded-lg p-1.5 flex items-center justify-center h-8 shadow-sm overflow-visible">
+                  <svg class="h-full w-full" viewBox="0 0 120 50" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg">
+                    <path fill="#4285F4" d="M38.2 22.1c0-1.4-.1-2.8-.4-4.1H19.5v7.8h10.5c-.5 2.5-1.8 4.6-3.9 6l6.3 4.9c3.7-3.4 5.8-8.4 5.8-14.6z"/>
+                    <path fill="#34A853" d="M19.5 41.2c6 0 11-2 14.7-5.4l-6.3-4.9c-2 1.3-4.5 2.1-8.4 2.1-6.5 0-12-4.4-14-10.3H3.1v5.1C6.8 35.2 12.6 41.2 19.5 41.2z"/>
+                    <path fill="#FBBC05" d="M5.5 22.7c-.5-1.5-.8-3.1-.8-4.7s.3-3.2.8-4.7V8.2H3.1C1.1 12.2 0 16.8 0 21.8s1.1 9.6 3.1 13.6l2.4-12.7z"/>
+                    <path fill="#EA4335" d="M19.5 8.4c3.3 0 6.2 1.1 8.5 3.3l6.4-6.4C30.5 1.9 25.5 0 19.5 0 12.6 0 6.8 6 3.1 13.4l2.4 12.7c2-5.9 7.5-10.3 14-10.3z"/>
+                    <text x="46" y="33" font-family="Plus Jakarta Sans, sans-serif" font-weight="800" font-size="28" fill="#202124">Pay</text>
                   </svg>
                 </div>
 
                 <!-- PhonePe Pill -->
-                <div class="bg-white rounded-lg p-1.5 flex items-center justify-center h-8 shadow-sm">
-                  <div class="flex items-center justify-center gap-1">
-                    <svg class="h-4 w-4" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
-                      <rect width="100" height="100" rx="20" fill="#5f259f"/>
-                      <path d="M70 30H50V20H40V30H30V40H40V75C40 77.8 42.2 80 45 80H55C57.8 80 60 77.8 60 75V55H70C72.8 55 75 52.8 75 50V35C75 32.2 72.8 30 70 30Z" fill="white"/>
-                    </svg>
-                    <span class="text-[#5f259f] font-black text-[11px] tracking-tight">PhonePe</span>
-                  </div>
+                <div class="bg-white rounded-lg p-1.5 flex items-center justify-center h-8 shadow-sm overflow-visible">
+                  <svg class="h-full w-full" viewBox="0 0 120 40" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg">
+                    <rect x="2" y="5" width="30" height="30" rx="8" fill="#5f259f"/>
+                    <path d="M22 13h-6v-3h-3v3h-3v3h3v11c0 1.1.9 2 2 2h3c1.1 0 2-.9 2-2v-6h2c1.1 0 2-.9 2-2v-4c0-1.1-.9-2-2-2z" fill="white"/>
+                    <text x="38" y="27" font-family="Plus Jakarta Sans, sans-serif" font-weight="900" font-size="18" fill="#5f259f">PhonePe</text>
+                  </svg>
                 </div>
 
                 <!-- Paytm Pill -->
-                <div class="bg-white rounded-lg p-1.5 flex items-center justify-center h-8 shadow-sm">
-                  <span class="font-extrabold text-xs tracking-tighter text-[#002e6e]">pay<span class="text-[#00baf2]">tm</span></span>
+                <div class="bg-white rounded-lg p-1.5 flex items-center justify-center h-8 shadow-sm overflow-visible">
+                  <svg class="h-full w-full" viewBox="0 0 100 40" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg">
+                    <text x="5" y="28" font-family="Plus Jakarta Sans, sans-serif" font-weight="800" font-size="22" fill="#002e6e">pay<tspan fill="#00baf2">tm</tspan></text>
+                  </svg>
                 </div>
 
                 <!-- BHIM UPI Pill -->
-                <div class="bg-white rounded-lg p-1.5 flex items-center justify-center h-8 shadow-sm">
-                  <span class="font-black italic text-[10px] tracking-wider text-[#002e6e]">BHIM <span class="text-[#f15a24]">UPI</span></span>
+                <div class="bg-white rounded-lg p-1.5 flex items-center justify-center h-8 shadow-sm overflow-visible">
+                  <svg class="h-full w-full" viewBox="0 0 100 40" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg">
+                    <text x="2" y="27" font-family="Plus Jakarta Sans, sans-serif" font-weight="900" font-style="italic" font-size="18" fill="#002e6e">BHIM <tspan fill="#f15a24">UPI</tspan></text>
+                  </svg>
                 </div>
 
               </div>
@@ -448,8 +451,8 @@
         updateQRCard();
       });
 
-      // Bind input, keyup, and change for INSTANT card updates
-      [customInput, amountInput, noteInput].forEach(element => {
+      // Bind input, keyup, and change for INSTANT card updates across all control inputs
+      [presetSelect, customInput, amountInput, noteInput].forEach(element => {
         element.addEventListener("input", updateQRCard);
         element.addEventListener("keyup", updateQRCard);
         element.addEventListener("change", updateQRCard);
@@ -465,6 +468,47 @@
     // Manual Re-Render Trigger
     function forceReRender() {
       updateQRCard();
+    }
+
+    // Draw Shield & Zap Logo Directly onto the QR Canvas to prevent misalignment during download
+    function drawCenterLogoOnCanvas(canvas) {
+      const ctx = canvas.getContext('2d');
+      const cx = canvas.width / 2;
+      const cy = canvas.height / 2;
+      const size = 44; // Outer badge size
+      const half = size / 2;
+
+      // Draw dark background badge
+      ctx.save();
+      ctx.beginPath();
+      const radius = 12;
+      ctx.roundRect(cx - half, cy - half, size, size, radius);
+      ctx.fillStyle = "#020617";
+      ctx.fill();
+      ctx.lineWidth = 2;
+      ctx.strokeStyle = "#34d399";
+      ctx.stroke();
+
+      // Inner fill gradient
+      ctx.beginPath();
+      ctx.roundRect(cx - half + 3, cy - half + 3, size - 6, size - 6, radius - 2);
+      ctx.fillStyle = "rgba(16, 185, 129, 0.25)";
+      ctx.fill();
+
+      // Draw Lightning Bolt (Zap) Icon
+      ctx.beginPath();
+      ctx.fillStyle = "#67e8f9";
+      // Lightning bolt path centered at (cx, cy)
+      ctx.moveTo(cx + 2, cy - 11);
+      ctx.lineTo(cx - 9, cy + 1);
+      ctx.lineTo(cx - 1, cy + 1);
+      ctx.lineTo(cx - 3, cy + 11);
+      ctx.lineTo(cx + 8, cy - 1);
+      ctx.lineTo(cx + 0, cy - 1);
+      ctx.closePath();
+      ctx.fill();
+
+      ctx.restore();
     }
 
     // 4. Dynamic QR & Card Rendering Engine
@@ -509,12 +553,26 @@
         colorLight: "#ffffff",
         correctLevel: QRCode.CorrectLevel.H
       });
+
+      // Overlay center emblem directly onto canvas after render
+      setTimeout(() => {
+        const canvas = qrContainer.querySelector("canvas");
+        if (canvas) {
+          drawCenterLogoOnCanvas(canvas);
+        }
+      }, 50);
     }
 
     // 5. High-Resolution PNG Capture & Download via html2canvas
     function downloadCardPNG() {
       const cardElement = document.getElementById("printable-upi-card");
       
+      // Ensure canvas center logo is fresh before capturing
+      const qrCanvas = document.querySelector("#qrcode canvas");
+      if (qrCanvas) {
+        drawCenterLogoOnCanvas(qrCanvas);
+      }
+
       // Temporarily ensure scaling neutral
       const originalTransform = cardElement.style.transform;
       cardElement.style.transform = "none";
