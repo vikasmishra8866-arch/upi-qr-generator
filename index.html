@@ -5,12 +5,12 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Elite UPI QR Card Generator</title>
 
-  <!-- Fonts -->
+  <!-- Google Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
-  <!-- Icons (FontAwesome & Lucide) -->
+  <!-- FontAwesome & Lucide Icons -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
   <script src="https://unpkg.com/lucide@latest"></script>
 
@@ -42,7 +42,7 @@
       overflow-x: hidden;
     }
 
-    /* Interactive Background Canvas */
+    /* Interactive Particle Canvas */
     #bg-canvas {
       position: fixed;
       top: 0;
@@ -53,25 +53,12 @@
       pointer-events: none;
     }
 
-    /* Glassmorphism & Metallic Aesthetics */
+    /* Glassmorphism & Metallic Aesthetic */
     .glass-panel {
-      background: rgba(6, 15, 12, 0.75);
+      background: rgba(6, 15, 12, 0.78);
       backdrop-filter: blur(20px);
       -webkit-backdrop-filter: blur(20px);
       border: 1px solid rgba(16, 185, 129, 0.25);
-    }
-
-    .metallic-card {
-      background: linear-gradient(135deg, rgba(2, 44, 34, 0.92) 0%, rgba(15, 23, 42, 0.95) 50%, rgba(4, 47, 46, 0.92) 100%);
-      border: 1px solid rgba(16, 185, 129, 0.45);
-      box-shadow: 0 20px 50px rgba(16, 185, 129, 0.25), inset 0 0 25px rgba(16, 185, 129, 0.12);
-    }
-
-    .metallic-reflection {
-      position: absolute;
-      top: 0; left: 0; right: 0; bottom: 0;
-      background: linear-gradient(115deg, transparent 20%, rgba(255, 255, 255, 0.08) 45%, rgba(255, 255, 255, 0.16) 50%, rgba(255, 255, 255, 0.08) 55%, transparent 80%);
-      pointer-events: none;
     }
 
     /* Custom Scrollbar */
@@ -98,7 +85,7 @@
       height: auto;
     }
 
-    /* Fix text truncation & explicit alignment for html2canvas capture */
+    /* Explicit text alignment and truncation bounds for html2canvas export */
     .card-text-fix {
       display: block;
       width: 100%;
@@ -166,7 +153,7 @@
           </div>
           <span class="text-xs font-mono text-cyan-400 bg-cyan-950/60 border border-cyan-500/40 px-2.5 py-1 rounded-full flex items-center gap-1.5">
             <span class="w-2 h-2 rounded-full bg-cyan-400 animate-ping"></span>
-            Real-time Sync
+            Real-Time Sync
           </span>
         </div>
 
@@ -187,7 +174,7 @@
             </div>
           </div>
 
-          <!-- 2. Custom UPI ID Input Box (Visible when "custom" selected) -->
+          <!-- 2. Custom UPI ID Input Box (Visible when "custom" is selected) -->
           <div id="custom-upi-container" class="space-y-2 hidden">
             <label class="block text-xs font-semibold uppercase tracking-wider text-cyan-300/90">Custom UPI VPA</label>
             <div class="relative">
@@ -254,14 +241,14 @@
           <!-- Gloss Diagonal Reflection Overlay -->
           <div class="bg-gradient-to-tr from-transparent via-white/10 to-transparent pointer-events-none absolute inset-0"></div>
 
-          <!-- Decorative Ambient Lighting Blurs -->
+          <!-- Decorative Ambient Blur Lights -->
           <div class="absolute -top-12 -right-12 w-36 h-36 bg-emerald-500/20 rounded-full blur-2xl pointer-events-none"></div>
           <div class="absolute -bottom-12 -left-12 w-36 h-36 bg-cyan-500/20 rounded-full blur-2xl pointer-events-none"></div>
 
           <!-- CARD CONTENT CONTAINER -->
           <div class="relative z-10 flex flex-col items-center space-y-4 text-center">
             
-            <!-- 1. CARD TOP HEADER BAR (Security Seal & Brand Title, NO PAYEE NAME, NO CHIP) -->
+            <!-- 1. CARD TOP HEADER BAR -->
             <div class="w-full flex items-center justify-between border-b border-emerald-500/25 pb-3">
               <!-- Security Seal Badge -->
               <div class="flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-emerald-950/90 border border-emerald-500/40 text-[10px] font-mono font-bold text-emerald-300 shadow-sm">
@@ -292,12 +279,10 @@
               <span class="text-[10px] font-extrabold tracking-wider text-amber-300 uppercase">⚡ INSTANT PAYMENT WITH ANY UPI APP</span>
             </div>
 
-            <!-- 4. CENTERPIECE QR CODE FRAME WITH ULTRA-PREMIUM CENTER SHIELD/ZAP EMBLEM -->
+            <!-- 4. CENTERPIECE QR CODE FRAME -->
             <div class="relative p-3 rounded-2xl bg-white border-2 border-emerald-400/80 shadow-[0_0_30px_rgba(16,185,129,0.35)] my-1">
-              
               <!-- QR Code Container -->
               <div id="qrcode" class="flex items-center justify-center min-w-[210px] min-h-[210px]"></div>
-
             </div>
 
             <!-- 5. CARD FOOTER DETAILS (Amount & Note) -->
@@ -312,7 +297,7 @@
               </div>
             </div>
 
-            <!-- 6. RE-ENGINEERED PIXEL-PERFECT OFFICIAL UPI APP LOGOS BAR -->
+            <!-- 6. PIXEL-PERFECT OFFICIAL UPI APP LOGOS BAR -->
             <div class="w-full pt-1">
               <div class="text-[9px] font-mono text-slate-400 uppercase tracking-widest mb-2">Supported Digital Wallets</div>
               
@@ -395,7 +380,7 @@
 
   </div>
 
-  <!-- JAVASCRIPT ENGINE -->
+  <!-- JAVASCRIPT LOGIC ENGINE -->
   <script>
     let qrcodeInstance = null;
 
@@ -498,7 +483,6 @@
       // Draw Lightning Bolt (Zap) Icon
       ctx.beginPath();
       ctx.fillStyle = "#67e8f9";
-      // Lightning bolt path centered at (cx, cy)
       ctx.moveTo(cx + 2, cy - 11);
       ctx.lineTo(cx - 9, cy + 1);
       ctx.lineTo(cx - 1, cy + 1);
@@ -532,7 +516,7 @@
       const noteDisplay = document.getElementById("card-note-display");
       noteDisplay.textContent = note || "Instant Payment Transfer";
 
-      // Build Standard UPI Protocol String: upi://pay?pa=VPA&am=AMOUNT&tn=NOTE&cu=INR
+      // Build Standard UPI Protocol String
       let upiURI = `upi://pay?pa=${encodeURIComponent(upiId)}&cu=INR`;
       if (amount && parseFloat(amount) > 0) {
         upiURI += `&am=${encodeURIComponent(amount)}`;
