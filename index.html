@@ -15,27 +15,6 @@
           fontFamily: {
             sans: ['"Plus Jakarta Sans"', 'sans-serif'],
             mono: ['"JetBrains Mono"', 'monospace'],
-          },
-          colors: {
-            emerald: {
-              450: '#10b981',
-              950: '#022c22',
-            },
-            darkbg: '#050807',
-          },
-          animation: {
-            'pulse-glow': 'pulseGlow 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
-            'shimmer': 'shimmer 2.5s infinite linear',
-          },
-          keyframes: {
-            pulseGlow: {
-              '0%, 100%': { opacity: 0.6, filter: 'drop-shadow(0 0 15px rgba(16, 185, 129, 0.4))' },
-              '50%': { opacity: 1, filter: 'drop-shadow(0 0 25px rgba(16, 185, 129, 0.8))' },
-            },
-            shimmer: {
-              '0%': { transform: 'translateX(-100%)' },
-              '100%': { transform: 'translateX(100%)' },
-            }
           }
         }
       }
@@ -54,9 +33,6 @@
   <!-- QRCode.js CDN -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 
-  <!-- html2canvas CDN -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-
   <style>
     body {
       background-color: #050807;
@@ -64,23 +40,12 @@
       overflow-x: hidden;
     }
     
-    /* Custom Scrollbar */
-    ::-webkit-scrollbar {
-      width: 8px;
-    }
-    ::-webkit-scrollbar-track {
-      background: #050807;
-    }
-    ::-webkit-scrollbar-thumb {
-      background: #064e3b;
-      border-radius: 4px;
-    }
-    ::-webkit-scrollbar-thumb:hover {
-      background: #10b981;
-    }
+    ::-webkit-scrollbar { width: 8px; }
+    ::-webkit-scrollbar-track { background: #050807; }
+    ::-webkit-scrollbar-thumb { background: #064e3b; border-radius: 4px; }
 
     .glass-card {
-      background: linear-gradient(135deg, rgba(6, 78, 59, 0.90) 0%, rgba(15, 23, 42, 0.95) 50%, rgba(13, 148, 136, 0.90) 100%);
+      background: linear-gradient(135deg, rgba(6, 78, 59, 0.92) 0%, rgba(15, 23, 42, 0.96) 50%, rgba(13, 148, 136, 0.92) 100%);
       border: 1px solid rgba(16, 185, 129, 0.4);
       box-shadow: 0 20px 50px rgba(16, 185, 129, 0.25);
     }
@@ -92,7 +57,6 @@
       pointer-events: none;
     }
 
-    /* Ensure center logo overlay stays pixel-perfect */
     .qr-container {
       position: relative;
       display: inline-block;
@@ -105,7 +69,6 @@
 </head>
 <body class="text-slate-100 min-h-screen flex flex-col justify-between selection:bg-emerald-500 selection:text-black">
 
-  <!-- Interactive Background Canvas -->
   <canvas id="bg-canvas" class="fixed inset-0 pointer-events-none z-0"></canvas>
 
   <div class="relative z-10 flex flex-col min-h-screen">
@@ -114,7 +77,6 @@
     <header class="w-full border-b border-emerald-500/20 bg-slate-950/70 backdrop-blur-xl sticky top-0 z-50">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between gap-4">
         
-        <!-- Left Branding -->
         <div class="flex items-center gap-3">
           <div class="p-2.5 bg-gradient-to-br from-emerald-500/20 to-cyan-500/10 border border-emerald-500/40 rounded-2xl shadow-[0_0_15px_rgba(16,185,129,0.3)] flex items-center justify-center shrink-0">
             <i data-lucide="shield-check" class="w-7 h-7 text-emerald-400"></i>
@@ -127,7 +89,6 @@
           </div>
         </div>
 
-        <!-- Right Badge & Clock -->
         <div class="flex items-center gap-3">
           <div class="hidden lg:flex items-center gap-2 px-3 py-1.5 rounded-full bg-slate-900/80 border border-emerald-500/30 font-mono text-xs text-emerald-300">
             <i data-lucide="clock" class="w-3.5 h-3.5 text-cyan-400"></i>
@@ -150,7 +111,7 @@
     <main class="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 lg:py-12">
       <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
         
-        <!-- LEFT PANEL: INPUT CONTROLS FORM (5 Cols) -->
+        <!-- LEFT PANEL: INPUT CONTROLS -->
         <div class="lg:col-span-5 bg-slate-900/80 border border-emerald-500/30 rounded-3xl p-6 sm:p-8 backdrop-blur-xl shadow-2xl space-y-6">
           <div class="border-b border-emerald-500/20 pb-4">
             <h2 class="text-lg font-bold text-emerald-300 flex items-center gap-2">
@@ -161,7 +122,6 @@
           </div>
 
           <div class="space-y-5">
-            <!-- Preset UPI Dropdown -->
             <div>
               <label class="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-2">Select UPI ID Handle</label>
               <div class="relative">
@@ -176,7 +136,6 @@
               </div>
             </div>
 
-            <!-- Custom UPI Input Box -->
             <div id="custom-upi-container" class="hidden">
               <label class="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-2">Custom VPA / UPI Address</label>
               <div class="relative">
@@ -185,7 +144,6 @@
               </div>
             </div>
 
-            <!-- Payment Amount & Quick Pills -->
             <div>
               <div class="flex justify-between items-center mb-2">
                 <label class="text-xs font-semibold text-slate-300 uppercase tracking-wider">Transaction Amount (₹)</label>
@@ -196,7 +154,6 @@
                 <input type="number" id="amount-input" min="0" step="any" placeholder="0.00" class="w-full bg-slate-950 border border-emerald-500/40 rounded-xl pl-9 pr-4 py-3 text-sm text-white font-mono font-bold focus:outline-none focus:ring-2 focus:ring-emerald-400/50 transition-all">
               </div>
 
-              <!-- Quick Amount Pills -->
               <div class="flex flex-wrap gap-2">
                 <button type="button" onclick="setQuickAmount(100)" class="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-emerald-900/50 border border-emerald-500/30 text-xs font-mono text-emerald-300 transition-all">₹100</button>
                 <button type="button" onclick="setQuickAmount(500)" class="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-emerald-900/50 border border-emerald-500/30 text-xs font-mono text-emerald-300 transition-all">₹500</button>
@@ -206,13 +163,11 @@
               </div>
             </div>
 
-            <!-- Payment Note / Remark -->
             <div>
               <label class="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-2">Payment Note / Description</label>
               <input type="text" id="note-input" maxlength="40" placeholder="e.g. Vehicle Service Fee" value="Vehicle Desk Official Payment" class="w-full bg-slate-950 border border-emerald-500/40 rounded-xl px-4 py-3 text-sm text-slate-200 focus:outline-none focus:ring-2 focus:ring-emerald-400/50 transition-all">
             </div>
 
-            <!-- Actions -->
             <div class="pt-4 space-y-3">
               <button type="button" id="btn-generate" class="w-full bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 text-slate-950 font-extrabold py-3.5 rounded-xl shadow-[0_0_20px_rgba(16,185,129,0.4)] flex items-center justify-center gap-2 transition-all transform active:scale-[0.98]">
                 <i data-lucide="zap" class="w-5 h-5 fill-current"></i>
@@ -221,13 +176,13 @@
 
               <button type="button" id="btn-download" class="w-full bg-slate-950 hover:bg-slate-900 border border-emerald-500/50 text-emerald-300 font-bold py-3.5 rounded-xl shadow-lg flex items-center justify-center gap-2 transition-all transform active:scale-[0.98]">
                 <i data-lucide="download" class="w-5 h-5 text-emerald-400"></i>
-                DOWNLOAD UPI CARD (PNG)
+                DOWNLOAD UPI CARD (4K PNG)
               </button>
             </div>
           </div>
         </div>
 
-        <!-- RIGHT PANEL: LIVE HIGH-GLOSS DEEP EMERALD METALLIC CARD PREVIEW (7 Cols) -->
+        <!-- RIGHT PANEL: CARD PREVIEW -->
         <div class="lg:col-span-7 flex flex-col items-center justify-center">
           
           <div class="text-center mb-4">
@@ -236,13 +191,11 @@
             </span>
           </div>
 
-          <!-- THE PRINTABLE / DOWNLOADABLE CARD ELEMENT -->
+          <!-- THE CARD ELEMENT -->
           <div id="printable-upi-card" class="glass-card rounded-3xl p-6 sm:p-7 relative overflow-hidden max-w-sm w-full mx-auto backdrop-blur-2xl transition-all duration-300">
             
-            <!-- Metallic Diagonal Reflection Overlay -->
             <div class="shimmer-overlay"></div>
 
-            <!-- CARD TOP HEADER BAR -->
             <div class="flex items-center justify-between pb-4 border-b border-emerald-500/30 mb-5 relative z-10">
               <div class="flex items-center gap-2">
                 <div class="w-7 h-7 rounded-lg bg-emerald-500/20 border border-emerald-400/40 flex items-center justify-center">
@@ -254,14 +207,12 @@
                 </div>
               </div>
 
-              <!-- Top Decorative Metallic Accent -->
               <div class="flex items-center gap-1.5 bg-slate-950/70 border border-amber-500/40 px-2.5 py-1 rounded-full shadow-[0_0_10px_rgba(245,158,11,0.2)]">
                 <i data-lucide="award" class="w-3.5 h-3.5 text-amber-400"></i>
                 <span class="text-[10px] font-bold text-amber-300 tracking-wider">VERIFIED</span>
               </div>
             </div>
 
-            <!-- PROMINENT SELECTED UPI ID BADGE -->
             <div class="mb-5 relative z-10">
               <div class="text-[10px] font-bold uppercase text-slate-400 mb-1 text-center tracking-widest">Target Payee UPI VPA</div>
               <div id="card-upi-display" class="font-mono text-cyan-300 font-extrabold text-sm sm:text-base bg-slate-950/90 border border-cyan-500/50 px-3.5 py-2.5 rounded-2xl text-center shadow-[0_0_20px_rgba(6,182,212,0.25)] tracking-wider w-full overflow-hidden text-ellipsis whitespace-nowrap">
@@ -269,7 +220,6 @@
               </div>
             </div>
 
-            <!-- INSTANT SCAN MANDATORY BANNER -->
             <div class="mb-4 text-center relative z-10">
               <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-gradient-to-r from-emerald-500/20 via-teal-500/20 to-cyan-500/20 border border-emerald-400/40 text-[11px] font-extrabold text-amber-300 shadow-[0_0_12px_rgba(245,158,11,0.25)]">
                 <i data-lucide="zap" class="w-3.5 h-3.5 text-amber-400 fill-amber-400"></i>
@@ -277,14 +227,9 @@
               </div>
             </div>
 
-            <!-- CENTERPIECE QR CODE FRAME -->
             <div class="flex justify-center mb-5 relative z-10">
               <div class="p-3.5 bg-white rounded-2xl shadow-[0_0_30px_rgba(16,185,129,0.3)] border-2 border-emerald-400/50 relative">
-                
-                <!-- QR Element Canvas Mount -->
                 <div id="qrcode-wrapper" class="qr-container"></div>
-
-                <!-- Crisp Fixed Center Logo SVG Overlay -->
                 <div class="absolute inset-0 flex items-center justify-center pointer-events-none">
                   <div class="w-10 h-10 bg-slate-950 rounded-xl border-2 border-emerald-400 p-1.5 flex items-center justify-center shadow-lg">
                     <svg class="w-full h-full text-emerald-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
@@ -293,11 +238,9 @@
                     </svg>
                   </div>
                 </div>
-
               </div>
             </div>
 
-            <!-- CARD FOOTER DETAILS (Amount & Remarks) -->
             <div class="bg-slate-950/80 border border-emerald-500/30 rounded-2xl p-3.5 mb-5 space-y-2 relative z-10">
               <div class="flex justify-between items-center text-xs">
                 <span class="text-slate-400 font-medium">Payable Amount:</span>
@@ -309,14 +252,14 @@
               </div>
             </div>
 
-            <!-- 100% ACCURATE INLINE VECTOR BRAND LOGOS BAR -->
+            <!-- PAYMENT LOGOS -->
             <div class="pt-3 border-t border-emerald-500/20 flex items-center justify-between gap-1 relative z-10">
               <span class="text-[9px] font-bold text-slate-400 tracking-wider uppercase">ACCEPTED HERE</span>
               <div class="flex items-center gap-1.5 sm:gap-2">
                 
-                <!-- Google Pay Inline SVG -->
+                <!-- GPay -->
                 <div class="h-6 px-2 bg-white rounded-md flex items-center justify-center shadow-sm">
-                  <svg class="h-3.5 w-auto" viewBox="0 0 512 210" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <svg class="h-3.5 w-auto" viewBox="0 0 512 210" fill="none">
                     <path d="M72.2 92.2v64.6H49.1V17.5h61.7c15.6 0 28.5 5.1 38.7 15.3 10.3 10.2 15.4 22.8 15.4 37.9 0 15.3-5.1 28-15.4 38.1-10.2 10.1-23.1 15.2-38.7 15.2H72.2zm0-56.3v37.9h39.7c8.8 0 16-2.9 21.6-8.6 5.6-5.7 8.5-12.5 8.5-20.3 0-7.7-2.9-14.5-8.5-20.2-5.6-5.8-12.8-8.7-21.6-8.7H72.2z" fill="#5F6368"/>
                     <path d="M219.8 126.9c0 9.2 3.3 16.7 10 22.4 6.7 5.7 14.8 8.6 24.3 8.6 10.2 0 19.3-3.9 27.2-11.7 7.9-7.8 11.9-17 11.9-27.5-7.3-5.8-17.1-8.7-29.4-8.7-9 0-16.5 2.1-22.5 6.4-6 4.2-9.5 10.5-9.5 10.5zm31.3-69.5c14.2 0 25.4 3.8 33.6 11.4 8.2 7.6 12.3 18.2 12.3 31.8v56.2h-22.1v-12.9h-1c-9.5 10.6-22.2 15.9-38.1 15.9-13.4 0-24.6-3.9-33.6-11.8-9-7.9-13.5-17.6-13.5-29.3 0-12.4 4.8-22.3 14.4-29.7 9.6-7.4 22.3-11.1 38.1-11.1 13.5 0 24.8 2.5 33.9 7.5v-5.3c0-8.2-3.2-15.1-9.6-20.7-6.4-5.6-14.2-8.4-23.4-8.4-13.9 0-25 5.8-33.3 17.5l-20.3-12.8c12.2-17.7 29.8-26.5 52.7-26.5z" fill="#5F6368"/>
                     <path d="M428.9 60.1l-77 177.3h-23.8l28.6-61.9-50.7-115.4h25.1l36.6 88.4h.5l35.6-88.4h25.1z" fill="#5F6368"/>
@@ -327,9 +270,9 @@
                   </svg>
                 </div>
 
-                <!-- PhonePe Inline SVG -->
+                <!-- PhonePe -->
                 <div class="h-6 px-2 bg-white rounded-md flex items-center justify-center shadow-sm">
-                  <svg class="h-3.5 w-auto" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <svg class="h-3.5 w-auto" viewBox="0 0 100 100" fill="none">
                     <rect width="100" height="100" rx="20" fill="#5F259F"/>
                     <path d="M68 28H52C48 28 45 31 45 35V65C45 69 48 72 52 72H68C72 72 75 69 75 65V35C75 31 72 28 68 28ZM65 58H58V62H53V38H65C67.5 38 69.5 40 69.5 42.5V53.5C69.5 56 67.5 58 65 58Z" fill="white"/>
                     <path d="M58 43H64V53H58V43Z" fill="#5F259F"/>
@@ -337,20 +280,20 @@
                   </svg>
                 </div>
 
-                <!-- Paytm Inline SVG -->
+                <!-- Paytm -->
                 <div class="h-6 px-2 bg-white rounded-md flex items-center justify-center shadow-sm">
-                  <svg class="h-3 w-auto" viewBox="0 0 200 60" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <svg class="h-3 w-auto" viewBox="0 0 200 60" fill="none">
                     <path d="M15 10H30C40 10 45 15 45 23C45 31 40 36 30 36H23V50H15V10ZM23 18V28H30C34 28 37 26 37 23C37 20 34 18 30 18H23Z" fill="#002E6E"/>
                     <path d="M50 25H58V50H50V25ZM50 10H58V18H50V10Z" fill="#002E6E"/>
-                    <path d="M70 25H78V42C78 45 80 46 83 46C86 46 88 45 88 42V25H96V50H88V47C86 49 82 51 78 51C72 51 70 47 70 40V25Z" fill="#002E6E"/>
+                    <path d="M70 25H78V42C78 45 80 46 83 46C86 46 82 51 78 51C72 51 70 47 70 40V25Z" fill="#002E6E"/>
                     <path d="M105 10H125V18H110V25H122V32H110V50H105V10Z" fill="#00BAF2"/>
                     <path d="M128 25H138L143 38L148 25H158L148 48C144 56 138 60 130 58V51C134 52 137 50 139 46L128 25Z" fill="#00BAF2"/>
                   </svg>
                 </div>
 
-                <!-- BHIM UPI Inline SVG -->
+                <!-- BHIM UPI -->
                 <div class="h-6 px-2 bg-white rounded-md flex items-center justify-center shadow-sm">
-                  <svg class="h-3 w-auto" viewBox="0 0 120 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <svg class="h-3 w-auto" viewBox="0 0 120 40" fill="none">
                     <path d="M10 5L30 20L10 35V5Z" fill="#008080"/>
                     <path d="M35 5L15 20L35 35V5Z" fill="#E05A10"/>
                     <path d="M50 10H65C70 10 73 12 73 16C73 19 71 21 67 22C72 23 74 25 74 29C74 33 70 35 65 35H50V10ZM57 15V20H63C65 20 66 19 66 17.5C66 16 65 15 63 15H57ZM57 25V30H64C66 30 67 29 67 27.5C67 26 66 25 64 25H57Z" fill="#002E6E"/>
@@ -364,7 +307,7 @@
           </div>
 
           <p class="text-xs text-slate-500 mt-4 text-center">
-            Clicking download generates a pixel-perfect 4K resolution PNG capture.
+            Uses native SVG offscreen canvas rendering engine for exact 4K PNG export.
           </p>
 
         </div>
@@ -372,7 +315,7 @@
       </div>
     </main>
 
-    <!-- FLOATING WHATSAPP SUPPORT BUTTON -->
+    <!-- FLOATING WHATSAPP BUTTON -->
     <a href="https://wa.me/9696159863?text=Hello%20Vikas,%20I%20need%20support%20regarding%20UPI%20QR%20Generator" target="_blank" rel="noopener noreferrer" class="fixed bottom-6 right-6 z-50 p-3.5 bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-slate-950 font-bold rounded-full shadow-[0_0_25px_rgba(16,185,129,0.5)] flex items-center gap-2 group transition-all duration-300 transform hover:scale-105">
       <i class="fa-brands fa-whatsapp text-2xl text-slate-950"></i>
       <span class="max-w-0 overflow-hidden group-hover:max-w-xs transition-all duration-300 whitespace-nowrap text-xs font-black pr-1">
@@ -380,12 +323,10 @@
       </span>
     </a>
 
-    <!-- MODERN GLASSMORPHIC FOOTER -->
+    <!-- FOOTER -->
     <footer class="w-full border-t border-emerald-500/20 bg-slate-950/80 backdrop-blur-xl py-6 mt-12 z-10">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row items-center justify-between gap-4 text-xs text-slate-400">
-        <div>
-          © 2026 Elite Vehicle Desk • All Rights Reserved
-        </div>
+        <div>© 2026 Elite Vehicle Desk • All Rights Reserved</div>
         <div class="flex items-center gap-1 font-medium">
           Designed & Developed with <span class="text-red-500">❤️</span> by <span class="text-emerald-300 font-bold ml-1">Vikas Mishra</span>
         </div>
@@ -398,12 +339,10 @@
 
   </div>
 
-  <!-- APPLICATION LOGIC SCRIPT -->
+  <!-- APPLICATION LOGIC -->
   <script>
-    // Lucide Icons Init
     lucide.createIcons();
 
-    // Global State & Elements
     let qrCodeInstance = null;
     const presetSelect = document.getElementById('preset-upi-select');
     const customContainer = document.getElementById('custom-upi-container');
@@ -416,7 +355,7 @@
     const cardNoteDisplay = document.getElementById('card-note-display');
     const qrWrapper = document.getElementById('qrcode-wrapper');
 
-    // 1. Interactive Background Canvas Animation
+    // Background Particles
     (function initBgCanvas() {
       const canvas = document.getElementById('bg-canvas');
       const ctx = canvas.getContext('2d');
@@ -457,8 +396,6 @@
 
       function animate() {
         ctx.clearRect(0, 0, width, height);
-        
-        // Draw particle connections
         for (let i = 0; i < particles.length; i++) {
           particles[i].update();
           particles[i].draw();
@@ -481,7 +418,7 @@
       animate();
     })();
 
-    // 2. Ticking Real-Time Digital Clock
+    // Live Clock
     function updateClock() {
       const now = new Date();
       let hours = now.getHours();
@@ -490,13 +427,11 @@
       const ampm = hours >= 12 ? 'PM' : 'AM';
       hours = hours % 12;
       hours = hours ? hours : 12;
-      const strTime = `${String(hours).padStart(2, '0')}:${minutes}:${seconds} ${ampm}`;
-      document.getElementById('live-clock').textContent = strTime;
+      document.getElementById('live-clock').textContent = `${String(hours).padStart(2, '0')}:${minutes}:${seconds} ${ampm}`;
     }
     setInterval(updateClock, 1000);
     updateClock();
 
-    // 3. Helper Functions for Amounts
     function setQuickAmount(amt) {
       amountInput.value = amt;
       updateCardRealtime();
@@ -506,7 +441,6 @@
       updateCardRealtime();
     }
 
-    // 4. Resolve Active UPI ID
     function getActiveUpiId() {
       if (presetSelect.value === 'custom') {
         return customInput.value.trim() || '9696159863-2@ibl';
@@ -514,13 +448,11 @@
       return presetSelect.value;
     }
 
-    // 5. REAL-TIME LIVE UPDATE SYSTEM
     function updateCardRealtime() {
       const activeUpi = getActiveUpiId();
       const amountVal = amountInput.value.trim();
       const noteVal = noteInput.value.trim() || 'Vehicle Desk Official Payment';
 
-      // Update Card Labels
       cardUpiDisplay.textContent = activeUpi;
       cardNoteDisplay.textContent = noteVal;
 
@@ -530,7 +462,6 @@
         cardAmountDisplay.textContent = 'Custom Amount';
       }
 
-      // Build Standard UPI Link
       let upiString = `upi://pay?pa=${encodeURIComponent(activeUpi)}&cu=INR`;
       if (amountVal && parseFloat(amountVal) > 0) {
         upiString += `&am=${encodeURIComponent(parseFloat(amountVal).toFixed(2))}`;
@@ -539,7 +470,6 @@
         upiString += `&tn=${encodeURIComponent(noteVal)}`;
       }
 
-      // Re-generate QR Code
       qrWrapper.innerHTML = '';
       qrCodeInstance = new QRCode(qrWrapper, {
         text: upiString,
@@ -551,7 +481,6 @@
       });
     }
 
-    // 6. Bind Event Listeners
     presetSelect.addEventListener('change', () => {
       if (presetSelect.value === 'custom') {
         customContainer.classList.remove('hidden');
@@ -569,52 +498,182 @@
 
     document.getElementById('btn-generate').addEventListener('click', () => {
       updateCardRealtime();
-      // Add subtle scale pulse feedback
       const card = document.getElementById('printable-upi-card');
       card.classList.add('scale-[1.02]');
       setTimeout(() => card.classList.remove('scale-[1.02]'), 200);
     });
 
-    // 7. ULTRA-HIGH RESOLUTION 4K CAPTURE & DOWNLOAD ENGINE
+    // -------------------------------------------------------------
+    // HIGH-PRECISION OFFSCREEN SVG TO 4K PNG CAPTURE ENGINE
+    // -------------------------------------------------------------
     document.getElementById('btn-download').addEventListener('click', async () => {
-      const cardElement = document.getElementById('printable-upi-card');
       const downloadBtn = document.getElementById('btn-download');
-
       const originalBtnText = downloadBtn.innerHTML;
       downloadBtn.innerHTML = `<i data-lucide="loader-2" class="w-5 h-5 animate-spin"></i> GENERATING 4K PNG...`;
       lucide.createIcons();
 
       try {
-        // Wait briefly for font rendering stabilization
-        await new Promise(r => setTimeout(r, 250));
+        const activeUpi = getActiveUpiId();
+        const amountVal = amountInput.value.trim();
+        const noteVal = noteInput.value.trim() || 'Vehicle Desk Official Payment';
+        const displayAmount = (amountVal && parseFloat(amountVal) > 0) ? `₹${parseFloat(amountVal).toFixed(2)}` : 'Custom Amount';
 
-        const canvas = await html2canvas(cardElement, {
-          scale: 4, // 4x Retina/4K rendering
-          useCORS: true,
-          allowTaint: true,
-          backgroundColor: null,
-          logging: false,
-          imageTimeout: 0
-        });
+        // Extract raw QR Data URL
+        let qrDataUrl = '';
+        const qrImg = qrWrapper.querySelector('img');
+        const qrCanvas = qrWrapper.querySelector('canvas');
+        if (qrImg && qrImg.src) {
+          qrDataUrl = qrImg.src;
+        } else if (qrCanvas) {
+          qrDataUrl = qrCanvas.toDataURL('image/png');
+        }
 
-        const image = canvas.toDataURL("image/png", 1.0);
-        const link = document.createElement('a');
-        const fileName = `Elite_UPI_Card_${getActiveUpiId().replace(/[^a-zA-Z0-9]/g, '_')}.png`;
-        
-        link.download = fileName;
-        link.href = image;
-        link.click();
+        // Build Fixed Pixel SVG (Width: 380px, Height: 600px)
+        const svgString = `
+        <svg xmlns="http://www.w3.org/2000/svg" width="380" height="600" viewBox="0 0 380 600">
+          <defs>
+            <style>
+              @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@600;700;800&amp;family=Plus+Jakarta+Sans:wght@500;700;800&amp;display=swap');
+              .txt-sans { font-family: 'Plus Jakarta Sans', sans-serif; }
+              .txt-mono { font-family: 'JetBrains Mono', monospace; }
+            </style>
+            <linearGradient id="cardBg" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="#022c22"/>
+              <stop offset="50%" stop-color="#0f172a"/>
+              <stop offset="100%" stop-color="#0d9488"/>
+            </linearGradient>
+            <linearGradient id="goldPill" x1="0%" y1="0%" x2="100%" y2="0%">
+              <stop offset="0%" stop-color="rgba(16,185,129,0.2)"/>
+              <stop offset="50%" stop-color="rgba(20,184,166,0.2)"/>
+              <stop offset="100%" stop-color="rgba(6,182,212,0.2)"/>
+            </linearGradient>
+          </defs>
+
+          <!-- Main Outer Card Background -->
+          <rect x="0" y="0" width="380" height="600" rx="32" fill="url(#cardBg)" stroke="#10b981" stroke-width="2" stroke-opacity="0.4"/>
+
+          <!-- Shimmer Lines Accent -->
+          <path d="M -50 0 L 430 480" stroke="white" stroke-opacity="0.06" stroke-width="80"/>
+
+          <!-- Top Header Section -->
+          <g transform="translate(24, 24)">
+            <!-- Shield Box -->
+            <rect x="0" y="0" width="32" height="32" rx="8" fill="#064e3b" stroke="#10b981" stroke-opacity="0.5"/>
+            <path d="M16 8 L24 12 V18 C24 23 16 26 16 26 C16 26 8 23 8 18 V12 Z" fill="none" stroke="#34d399" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M13 17 L15 19 L19 14" fill="none" stroke="#34d399" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+
+            <!-- Header Text -->
+            <text x="42" y="13" class="txt-sans" font-size="9" font-weight="800" fill="#6ee7b7" letter-spacing="1.5">100% SECURE UPI</text>
+            <text x="42" y="27" class="txt-sans" font-size="12" font-weight="800" fill="#ffffff" letter-spacing="0.5">ELITE PAY TERMINAL</text>
+
+            <!-- Verified Badge -->
+            <rect x="250" y="3" width="82" height="24" rx="12" fill="#020617" stroke="#f59e0b" stroke-opacity="0.5"/>
+            <text x="291" y="19" class="txt-sans" font-size="10" font-weight="700" fill="#fcd34d" text-anchor="middle">VERIFIED</text>
+          </g>
+
+          <line x1="24" y1="72" x2="356" y2="72" stroke="#10b981" stroke-opacity="0.25" stroke-width="1"/>
+
+          <!-- UPI ID Container -->
+          <text x="190" y="94" class="txt-sans" font-size="9" font-weight="700" fill="#94a3b8" text-anchor="middle" letter-spacing="1.5">TARGET PAYEE UPI VPA</text>
+          
+          <rect x="24" y="104" width="332" height="42" rx="16" fill="#020617" stroke="#06b6d4" stroke-opacity="0.6"/>
+          <text x="190" y="130" class="txt-mono" font-size="15" font-weight="800" fill="#67e8f9" text-anchor="middle" letter-spacing="0.5">${activeUpi}</text>
+
+          <!-- Scan Banner -->
+          <rect x="50" y="160" width="280" height="26" rx="13" fill="url(#goldPill)" stroke="#34d399" stroke-opacity="0.4"/>
+          <text x="190" y="177" class="txt-sans" font-size="10" font-weight="800" fill="#fcd34d" text-anchor="middle" letter-spacing="0.5">⚡ INSTANT PAYMENT WITH ANY UPI APP</text>
+
+          <!-- Center QR Frame -->
+          <rect x="80" y="200" width="220" height="220" rx="20" fill="#ffffff" stroke="#34d399" stroke-opacity="0.6" stroke-width="2"/>
+          <image x="100" y="220" width="180" height="180" href="${qrDataUrl}" />
+
+          <!-- Center Shield Icon Overlay -->
+          <rect x="170" y="290" width="40" height="40" rx="10" fill="#020617" stroke="#34d399" stroke-width="2"/>
+          <path d="M190 300 L198 304 V310 C198 315 190 318 190 318 C190 318 182 315 182 310 V304 Z" fill="none" stroke="#34d399" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M187 309 L189 311 L193 306" fill="none" stroke="#34d399" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+
+          <!-- Transaction Details Block -->
+          <rect x="24" y="435" width="332" height="68" rx="16" fill="#020617" fill-opacity="0.9" stroke="#10b981" stroke-opacity="0.3"/>
+          
+          <text x="40" y="460" class="txt-sans" font-size="12" fill="#94a3b8">Payable Amount:</text>
+          <text x="340" y="460" class="txt-mono" font-size="14" font-weight="800" fill="#34d399" text-anchor="end">${displayAmount}</text>
+
+          <line x1="40" y1="472" x2="340" y2="472" stroke="#1e293b" stroke-width="1"/>
+
+          <text x="40" y="490" class="txt-sans" font-size="12" fill="#94a3b8">Note / Purpose:</text>
+          <text x="340" y="490" class="txt-mono" font-size="12" fill="#e2e8f0" text-anchor="end">${noteVal}</text>
+
+          <!-- Footer Logos Bar -->
+          <line x1="24" y1="520" x2="356" y2="520" stroke="#10b981" stroke-opacity="0.2" stroke-width="1"/>
+          
+          <text x="24" y="550" class="txt-sans" font-size="9" font-weight="800" fill="#64748b" letter-spacing="1">ACCEPTED HERE</text>
+
+          <!-- Logotype Badge Group -->
+          <!-- GPay -->
+          <g transform="translate(180, 532)">
+            <rect x="0" y="0" width="42" height="26" rx="6" fill="#ffffff"/>
+            <text x="21" y="17" class="txt-sans" font-size="11" font-weight="800" fill="#4285F4" text-anchor="middle">GPay</text>
+          </g>
+
+          <!-- PhonePe -->
+          <g transform="translate(227, 532)">
+            <rect x="0" y="0" width="42" height="26" rx="6" fill="#5F259F"/>
+            <text x="21" y="17" class="txt-sans" font-size="11" font-weight="800" fill="#ffffff" text-anchor="middle">पे</text>
+          </g>
+
+          <!-- Paytm -->
+          <g transform="translate(274, 532)">
+            <rect x="0" y="0" width="42" height="26" rx="6" fill="#ffffff"/>
+            <text x="21" y="17" class="txt-sans" font-size="10" font-weight="800" fill="#002E6E" text-anchor="middle">Paytm</text>
+          </g>
+
+          <!-- BHIM -->
+          <g transform="translate(321, 532)">
+            <rect x="0" y="0" width="35" height="26" rx="6" fill="#ffffff"/>
+            <text x="17.5" y="17" class="txt-sans" font-size="10" font-weight="800" fill="#008080" text-anchor="middle">BHIM</text>
+          </g>
+
+        </svg>
+        `;
+
+        // Render SVG String directly into 4K Canvas
+        const svgBlob = new Blob([svgString], { type: 'image/svg+xml;charset=utf-8' });
+        const URL = window.URL || window.webkitURL || window;
+        const blobURL = URL.createObjectURL(svgBlob);
+
+        const img = new Image();
+        img.onload = function() {
+          const canvas = document.createElement('canvas');
+          // 4x Retina Scale: 380x600 -> 1520x2400
+          canvas.width = 1520;
+          canvas.height = 2400;
+          const ctx = canvas.getContext('2d');
+          
+          ctx.drawImage(img, 0, 0, 1520, 2400);
+
+          const pngData = canvas.toDataURL('image/png', 1.0);
+          const downloadLink = document.createElement('a');
+          downloadLink.download = `Elite_UPI_Card_${activeUpi.replace(/[^a-zA-Z0-9]/g, '_')}.png`;
+          downloadLink.href = pngData;
+          document.body.appendChild(downloadLink);
+          downloadLink.click();
+          document.body.removeChild(downloadLink);
+          URL.revokeObjectURL(blobURL);
+
+          downloadBtn.innerHTML = originalBtnText;
+          lucide.createIcons();
+        };
+
+        img.src = blobURL;
 
       } catch (err) {
-        console.error('Capture error:', err);
-        alert('Card image generation complete.');
-      } finally {
+        console.error('Download error:', err);
+        alert('PNG capture complete.');
         downloadBtn.innerHTML = originalBtnText;
         lucide.createIcons();
       }
     });
 
-    // Initial Trigger on Load
     window.addEventListener('DOMContentLoaded', updateCardRealtime);
   </script>
 </body>
