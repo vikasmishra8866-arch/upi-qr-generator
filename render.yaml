@@ -1,0 +1,10 @@
+services:
+  - type: web
+    name: elite-upi-qr-card-generator
+    env: static
+    buildCommand: echo "Static Site Ready"
+    staticPublishPath: ./
+    headers:
+      - path: /*
+        name: Cache-Control
+        value: public, max-age=3600
