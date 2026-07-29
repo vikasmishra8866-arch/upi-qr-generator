@@ -1,0 +1,21 @@
+{
+  "name": "elite-upi-qr-card-generator",
+  "version": "1.0.0",
+  "description": "Ultra-Premium Deep Emerald Metallic UPI QR Payment Terminal Card Generator",
+  "main": "index.html",
+  "scripts": {
+    "start": "npx serve -s ."
+  },
+  "dependencies": {
+    "serve": "^14.2.1"
+  },
+  "keywords": [
+    "upi",
+    "qr-code",
+    "generator",
+    "payment-card",
+    "render-static"
+  ],
+  "author": "Vikas Mishra",
+  "license": "MIT"
+}
